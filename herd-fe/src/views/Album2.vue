@@ -1,21 +1,25 @@
 <template>
-  <div class="herd-album">
-    <h1>Album 2</h1>
-    <div v-for="(m,i) in medias" class="imgbox">
+  <el-row>
+    <el-col :span="4">
+      <el-menu v-for="(e,i) in cates">
+        <el-menu-item :index="''+i+1">{{e[0]}}
+          ({{e[1]}})
+        </el-menu-item>
+      </el-menu>
+    </el-col>
+    <el-col :span="20">
+      <div class="grid-content bg-purple-light"></div>
+    </el-col>
+  </el-row>
 
-      <img :src="getUrlByHash(m.hash,'1Kq5')">
-
-    </div>
-    <el-button @click="load()"></el-button>
-  </div>
 </template>
 <script>
   import herdService from '../services/HerdService'
 
   export default {
-    name: 'herd-album',
+    name: 'herd-album222',
     data () {
-      return {medias: []}
+      return {cates: []}
     },
     mounted () {
       this.load()
@@ -25,12 +29,10 @@
       getUrlByHash: herdService.getUrlByHash,
       load () {
         console.log('loading')
-
-        herdService.listMedias({l: 30}, res => {
-          this.medias = res
+        herdService.countImageMediasByDate(null, res => {
+          this.cates = res
         })
       }
-
     }
   }
 

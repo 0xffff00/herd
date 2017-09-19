@@ -9,7 +9,7 @@
 <script>
   import hello from './components/Hello'
   import a1 from './components/a1'
-  import album from './views/Album'
+  import album from './views/Album2'
 
   export default {
     name: 'app',
