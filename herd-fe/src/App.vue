@@ -1,7 +1,6 @@
 <template>
   <div id="app2">
     <!--<router-view></router-view>-->
-    <a1></a1>
     <album></album>
   </div>
 </template>
@@ -21,7 +20,7 @@
 
 <style>
   #app {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', 'RobotoDraft', 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
