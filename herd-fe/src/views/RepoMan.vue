@@ -1,6 +1,6 @@
 <template>
-  <simpleMan2 :data="data" :ui.sync="ui" :model="model"
-              :querier="querier">
+  <TableMan :data="data" :ui.sync="ui" :model="model"
+            :querier="querier">
     <div slot="criteriaPane">
       <div>ssx
         <!--<el-form :inline="true" :model="querier">-->
@@ -30,15 +30,14 @@
     </div>
 
 
-
-  </simpleMan2>
+  </TableMan>
 </template>
 <script>
   import herdService from '../services/HerdService'
   import Dates from '../utils/Dates'
   import TextUtils from '../utils/Texts'
   import Arrays from '../utils/Arrays'
-  import simpleMan2 from '../components/SimpleMan2'
+  import TableMan from '../components/TableMan'
 
   export default {
     name: 'repo-man',
@@ -76,23 +75,19 @@
           },
           columns: [
             {
-              name: 'name',
+              key: 'name',
               title: '名称',
-              required: true
+              sortable: true
             },
             {
-              name: 'absPath',
-              title: '绝对路径'
+              key: 'absPath',
+              title: '绝对路径',
+              sortable: true
             },
             {
-              name: 'state',
-              title: '状态',
-              type: 'sk-template',
-              template: 'sk.man2.state'
-            },
-            {
-              type: 'sk-template',
-              template: 'sk.man2.action'
+              title: '操作',
+              key: 'action',
+              'sk-template': 'action'
             }
           ]
         },
@@ -102,7 +97,8 @@
           loading: false,
           editing: false,
           editorLabelWidth: '140px',
-          editorTitle: ''
+          editorTitle: '',
+          deleteConfirming: false
         }
 
       }
@@ -114,7 +110,7 @@
       }
     },
     methods: {},
-    components: {simpleMan2}
+    components: {TableMan}
   }
 </script>
 <style scoped>
