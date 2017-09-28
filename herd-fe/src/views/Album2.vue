@@ -45,7 +45,7 @@
 <script>
   import herdService from '../services/HerdService'
   import Dates from '../utils/Dates'
-  import TextUtils from '../utils/TextUtils'
+  import TextUtils from '../utils/Texts'
   import Arrays from '../utils/Arrays'
 
   /*

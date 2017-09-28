@@ -1,10 +1,10 @@
 import fetch from 'node-fetch'
-import UrlUtils from '../utils/UrlUtils'
-import BasicCrudUtils from '../utils/BasicCrudUtils'
+import Urls from '../utils/Urls'
+import RestApi from '../utils/RestApi'
 
 const CTX = 'http://localhost:8080/herd'
 const ajaxList = url => (params, callback) => {
-  let realUrl = UrlUtils.buildQueryUrl(url, params)
+  let realUrl = Urls.buildQueryUrl(url, params)
   fetch(realUrl).then(r => r.json()).then(callback)
 }
 
@@ -17,9 +17,7 @@ const listMedias = ajaxList(CTX + '/herd/medias')
 const listImageMedias = ajaxList(CTX + '/herd/imageMedias')
 const countImageMediasByYear = ajaxList(CTX + '/herd/imageMedias/countByYear')
 const countImageMediasByMonth = ajaxList(CTX + '/herd/imageMedias/countByMonth')
-const repoCrudApi = BasicCrudUtils.buildCrudApi(CTX + '/herd/repos',
-  (baseUrl, params) => baseUrl + '/?name=' + params.name
-)
+const repoRestApi = new RestApi(CTX + '/herd/repos/', '?name={name}')
 export default {
   listRepos,
   listMedias,
@@ -27,5 +25,5 @@ export default {
   getUrlByHash,
   countImageMediasByYear,
   countImageMediasByMonth,
-  repoCrudApi
+  repoRestApi
 }
