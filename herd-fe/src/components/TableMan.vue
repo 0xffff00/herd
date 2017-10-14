@@ -8,11 +8,12 @@
       <slot name="control-pane">
 
         <ButtonGroup shape="circle">
-          <Button type="ghost" icon="ios-plus-empty" @click="data.editor.item=null,ui.editing=true">新增</Button>
-          <Button type="ghost" icon="ios-minus-empty" disabled></Button>
+          <Button type="ghost" icon="ios-plus-empty" @click="data.editor.item=null,ui.editing=true"></Button>
+          <Button type="error" icon="trash-a" disabled></Button>
         </ButtonGroup>
+
         <span class="rt">
-          <Button type="primary" shape="circle" icon="ios-search" @click="readItems()">搜索</Button>
+          <Button type="primary" shape="circle" icon="ios-search" @click="readItems()"></Button>
         </span>
       </slot>
     </div>
@@ -261,7 +262,7 @@
         vue.ui.editing = true
       }
     }
-  }, '编辑')
+  })
 
   const rPopDel = vue => (h, params) => h(
     'Poptip',
@@ -288,7 +289,7 @@
         style: {
           marginRight: '5px'
         }
-      }, '删除')
+      })
     ]
   )
 </script>
