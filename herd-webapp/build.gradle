@@ -2,7 +2,7 @@ apply plugin: 'groovy'
 
 dependencies {
 
-    compile group: 'party.threebody.skean', name: 'skean-web', version: '2.0.0'
+    compile group: 'party.threebody.skean', name: 'skean-web', version: '2.0.2'
 
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: versions.groovy
 
@@ -11,9 +11,11 @@ dependencies {
 
 
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.'spring-boot'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow', version: versions.'spring-boot'
+
     compile group: 'org.springframework.boot', name: 'spring-boot-devtools', version: versions.'spring-boot'
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.'spring-boot'
-
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-test-autoconfigure', version: versions.'spring-boot'
 
 
     compile 'com.drewnoakes:metadata-extractor:2.10.1'

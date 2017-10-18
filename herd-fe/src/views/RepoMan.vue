@@ -85,6 +85,10 @@
               sortable: true
             },
             {
+              key: 'state',
+              title: '状态'
+            },
+            {
               title: '操作',
               key: 'action',
               'sk-template': 'action'

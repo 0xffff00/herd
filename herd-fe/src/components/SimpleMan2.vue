@@ -270,6 +270,7 @@
         }
       },
       'data.deleter.item': function (v) {
+        console.log('ddd:', v)
         if (v === null) {
           return
         }

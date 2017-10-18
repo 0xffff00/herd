@@ -63,17 +63,6 @@ public class HerdService {
     Environment env;
 
     //------- queries --------
-    public List<Repo> listAliveRepos() {
-        return repoDao.listByState("A");
-    }
-
-    public List<Repo> listRepos(QueryParamsSuite qps) {
-        return repoDao.readList(qps);
-    }
-
-    public int countRepos(QueryParamsSuite qps) {
-        return repoDao.readCount(qps);
-    }
 
 
     List<MediaPath> listMediaPaths() {
@@ -128,7 +117,23 @@ public class HerdService {
         return imageMediaDao.countByYear();
     }
 
-    //----- thin CRUDs ---------
+    //----- repo CRUDs ---------
+    public List<Repo> listAliveRepos() {
+        return repoDao.listByState("A");
+    }
+
+    public List<Repo> listRepos(QueryParamsSuite qps) {
+        return repoDao.readList(qps);
+    }
+
+    public Repo getRepo(String repoName) {
+        return repoDao.readOne(repoName);
+    }
+
+    public int countRepos(QueryParamsSuite qps) {
+        return repoDao.readCount(qps);
+    }
+
     public int createRepo(Repo repo) {
         repo.setSaveTime(LocalDateTime.now());
         return repoDao.create(repo);
@@ -141,6 +146,10 @@ public class HerdService {
     public int updateRepo(Repo repo, String repoName) {
         repo.setSaveTime(LocalDateTime.now());
         return repoDao.update(repo, repoName);
+    }
+    public int partialUpdateRepo(Map<String,Object> changes,String repoName){
+        changes.put("saveTime",LocalDateTime.now());
+        return repoDao.partialUpdate(changes,repoName);
     }
 
 
