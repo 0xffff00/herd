@@ -43,7 +43,7 @@
 
 </template>
 <script>
-  import herdService from '../services/HerdService'
+  import herdService from '../apis/HerdApi'
   import Dates from '../utils/Dates'
   import TextUtils from '../utils/Texts'
   import Arrays from '../utils/Arrays'

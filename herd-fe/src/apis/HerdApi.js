@@ -9,15 +9,15 @@ const ajaxList = url => (params, callback) => {
 }
 
 const getUrlByHash = function (hash, cacheCategory) {
-  return CTX + '/herd/pic2/' + hash + '.jpg?cache=' + cacheCategory
+  return CTX + '/file/' + hash + '.jpg?cache=' + cacheCategory
 }
 
-const listRepos = ajaxList(CTX + '/herd/repos')
-const listMedias = ajaxList(CTX + '/herd/medias')
-const listImageMedias = ajaxList(CTX + '/herd/imageMedias')
-const countImageMediasByYear = ajaxList(CTX + '/herd/imageMedias/countByYear')
-const countImageMediasByMonth = ajaxList(CTX + '/herd/imageMedias/countByMonth')
-const repoRestApi = new RestApi(CTX + '/herd/repos/', '?name={name}')
+const listRepos = ajaxList(CTX + '/repos')
+const listMedias = ajaxList(CTX + '/medias')
+const listImageMedias = ajaxList(CTX + '/imageMedias')
+const countImageMediasByYear = ajaxList(CTX + '/imageMedias/countByYear')
+const countImageMediasByMonth = ajaxList(CTX + '/imageMedias/countByMonth')
+const repoRestApi = new RestApi(CTX + '/repos/', '{name}')
 export default {
   listRepos,
   listMedias,

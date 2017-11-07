@@ -2,7 +2,7 @@
   <TableMan :data="data" :ui.sync="ui" :model="model"
             :querier="querier">
     <div slot="criteriaPane">
-      <div>ssx
+      <div>
         <!--<el-form :inline="true" :model="querier">-->
         <!--<el-form-item label="词语">-->
         <!--<el-input v-model="querier.criteria[0].value" placeholder="词语"></el-input>-->
@@ -33,7 +33,7 @@
   </TableMan>
 </template>
 <script>
-  import herdService from '../apis/HerdApi'
+  import dictApi from '../apis/DictApi'
   import Dates from '../utils/Dates'
   import TextUtils from '../utils/Texts'
   import Arrays from '../utils/Arrays'
@@ -65,8 +65,8 @@
           criteria: []
         },
         model: {
-          api: herdService.repoRestApi,
-          name: '仓库',
+          api: dictApi.words,
+          name: '词汇',
           columnDefault: {
             required: false,
             editable: true,
@@ -75,19 +75,19 @@
           },
           columns: [
             {
-              key: 'name',
+              key: 'text',
               title: '名称',
+              required: true,
               sortable: true
             },
             {
-              key: 'absPath',
-              title: '绝对路径',
-              sortable: true
+              key: 'desc',
+              title: '描述'
             },
             {
-              key: 'state',
-              title: '状态',
-              'sk-template': 'sk.man2.state'
+              key: 'updateTime',
+              title: '更新时间',
+              editable: false
             },
             {
               title: '操作',
@@ -108,12 +108,7 @@
 
       }
     },
-    computed: {
-      'ui.editor.title': function () {
-        let n = this.itemName
-        return (this.ui.currItem) ? '新增' + n : '修改' + n
-      }
-    },
+    computed: {},
     methods: {},
     components: {TableMan}
   }

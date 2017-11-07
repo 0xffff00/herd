@@ -13,7 +13,8 @@ import party.threebody.herd.webapp.util.ImageConverter;
 import party.threebody.herd.webapp.util.ImageMetaUtils;
 import party.threebody.herd.webapp.util.MediaType;
 import party.threebody.herd.webapp.util.RepoFileTypeUtils;
-import party.threebody.skean.data.query.QueryParamsSuite;
+import party.threebody.skean.data.query.Criteria;
+import party.threebody.skean.data.query.CriteriaAndSortingAndPaging;
 import party.threebody.skean.data.result.Count;
 import party.threebody.skean.data.result.Counts;
 import party.threebody.skean.jdbc.rs.DualColsBean;
@@ -88,21 +89,21 @@ public class HerdService {
         return mediaDao.listBySyncTime(syncTime);
     }
 
-    public List<Media> listMedias(QueryParamsSuite qps) {
-        return mediaDao.readList(qps);
+    public List<Media> listMedias(CriteriaAndSortingAndPaging csp) {
+        return mediaDao.readList(csp);
     }
 
 
-    public int countMedias(QueryParamsSuite qps) {
-        return mediaDao.readCount(qps);
+    public int countMedias(CriteriaAndSortingAndPaging csp) {
+        return mediaDao.readCount(csp);
     }
 
-    public List<ImageMedia> listImageMedias(QueryParamsSuite qps) {
-        return imageMediaDao.list(qps);
+    public List<ImageMedia> listImageMedias(CriteriaAndSortingAndPaging csp) {
+        return imageMediaDao.readList(csp);
     }
 
-    public int countImageMedias(QueryParamsSuite qps) {
-        return imageMediaDao.readCount(qps);
+    public int countImageMedias(Criteria csp) {
+        return imageMediaDao.readCount(csp);
     }
 
     public List<DualColsBean<LocalDate, Integer>> countImageMediasByDate() {
@@ -122,34 +123,36 @@ public class HerdService {
         return repoDao.listByState("A");
     }
 
-    public List<Repo> listRepos(QueryParamsSuite qps) {
-        return repoDao.readList(qps);
+    public List<Repo> listRepos(CriteriaAndSortingAndPaging csp) {
+        return repoDao.readList(csp);
     }
 
     public Repo getRepo(String repoName) {
         return repoDao.readOne(repoName);
     }
 
-    public int countRepos(QueryParamsSuite qps) {
-        return repoDao.readCount(qps);
+    public int countRepos(CriteriaAndSortingAndPaging csp) {
+        return repoDao.readCount(csp);
     }
 
+    @Transactional
     public int createRepo(Repo repo) {
-        repo.setSaveTime(LocalDateTime.now());
         return repoDao.create(repo);
     }
 
+    @Transactional
     public int deleteRepo(String repoName) {
         return repoDao.delete(repoName);
     }
 
+    @Transactional
     public int updateRepo(Repo repo, String repoName) {
-        repo.setSaveTime(LocalDateTime.now());
         return repoDao.update(repo, repoName);
     }
-    public int partialUpdateRepo(Map<String,Object> changes,String repoName){
-        changes.put("saveTime",LocalDateTime.now());
-        return repoDao.partialUpdate(changes,repoName);
+
+    @Transactional
+    public int partialUpdateRepo(Map<String, Object> changes, String repoName) {
+        return repoDao.partialUpdate(changes, repoName);
     }
 
 
@@ -162,7 +165,7 @@ public class HerdService {
         return Counts.deleted(rnd);
     }
 
-
+    @Transactional
     public Count clearMediaPaths(List<Repo> repos) {
         LocalDateTime actionTime = LocalDateTime.now();
         logger.info("clearing MediaPaths @ {} ...", actionTime);
@@ -171,7 +174,7 @@ public class HerdService {
         createRepoLogByRepos(actionTime, "clearMediaPaths", repos, afc);
         return afc;
     }
-
+    @Transactional
     public Count clearMedias(List<Repo> repos) {
         LocalDateTime actionTime = LocalDateTime.now();
         logger.info("clearMedias @ {} ...", actionTime);
@@ -181,7 +184,7 @@ public class HerdService {
         createRepoLogByRepos(actionTime, "clearMedias", repos, afc);
         return afc;
     }
-
+    @Transactional
     public Count clearImageMedias(List<Repo> repos) {
         LocalDateTime actionTime = LocalDateTime.now();
         logger.info("clearImageMedias @ {} ...", actionTime);
@@ -202,6 +205,7 @@ public class HerdService {
      * @param repos
      * @return
      */
+    @Transactional
     public List<Count> synchonizeAndAnalyzeAll(List<Repo> repos) {
         final LocalDateTime syncTime = LocalDateTime.now();
         List<Count> cnt1 = synchonizeMediaPaths(repos, syncTime);
@@ -219,6 +223,7 @@ public class HerdService {
      *
      * @return MediaPath's Count
      */
+    @Transactional
     public List<Count> synchonizeMediaPaths(List<Repo> repos, LocalDateTime syncTime) {
         logger.info("synchonizing MediaPaths @ {} ...", DateTimeFormatters.DEFAULT.format(syncTime));
         final long t0 = currentTimeMillis();
@@ -350,6 +355,7 @@ public class HerdService {
     /**
      * >>>data flow: MediaPath -> ImageMedia or else alike
      */
+    @Transactional
     public Count analyzeMedias(List<Media> medias, LocalDateTime analyzeTime) {
         logger.info("analyzing Medias @ {} ...", DateTimeFormatters.DEFAULT.format(analyzeTime));
         List<String> mediaHashs = medias.stream().map(Media::getHash).collect(toList());
@@ -374,6 +380,7 @@ public class HerdService {
     /**
      * analyze the file and save its metadata if not exists
      */
+    @Transactional
     public Count analyzeMedia(Media media, LocalDateTime analyzeTime) {
         final long t1 = currentTimeMillis();
         final String hash = media.getHash();
@@ -391,7 +398,7 @@ public class HerdService {
 
     }
 
-
+    @Transactional
     public Count convertToJpgByMedias(List<Media> medias, LocalDateTime convertTime, ImageConverter converter) {
         final int mediaCnt = medias.size();
         final AtomicInteger i = new AtomicInteger();
@@ -414,6 +421,7 @@ public class HerdService {
 
     }
 
+    @Transactional
     public Count convertToJPG(File srcImage, File destImage, LocalDateTime convertTime, ImageConverter converter) {
         final long t1 = currentTimeMillis();
         try {

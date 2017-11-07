@@ -1,24 +1,30 @@
 package party.threebody.herd.webapp.domain;
 
 
+import party.threebody.skean.data.Column;
+import party.threebody.skean.data.PrimaryKey;
+
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 
+@Table(name = "hd_media_image")
 public class ImageMedia {
-    protected String hash;
-    protected String type;
-    protected int height;
-    protected int width;
-    protected int exifBitDepth;
-    protected String exifMake;
-    protected String exifModel;
-    protected LocalDateTime exifDateTime;
-    protected String exifColorSpace;
-    protected String exifExposureTime;
-    protected String exifWhiteBalance;
-    protected String exifAperture;
+    protected @PrimaryKey String hash;
+    protected @Column String type;
+    protected @Column @NotNull int height;
+    protected @Column @NotNull int width;
+    protected @Column @NotNull int exifBitDepth;
+    protected @Column String exifMake;
+    protected @Column String exifModel;
+    protected @Column LocalDateTime exifDateTime;
+    protected @Column String exifColorSpace;
+    protected @Column String exifExposureTime;
+    protected @Column String exifWhiteBalance;
+    protected @Column String exifAperture;
 
     //----DTO props-----
     protected Integer fileSize;

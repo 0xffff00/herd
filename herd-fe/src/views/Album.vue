@@ -10,7 +10,7 @@
   </div>
 </template>
 <script>
-  import herdService from '../services/HerdService'
+  import herdService from '../apis/HerdApi'
 
   export default {
     name: 'herd-album',

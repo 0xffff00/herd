@@ -20,8 +20,17 @@ const responding2 = (okayCallback, failCallback) => resp => {
     resp.json().then(failCallback)
   }
 }
+
 export default class RestApi {
 
+  /*
+   * const repoRestApi = new RestApi(CTX + '/users/', '?name={name}&team={team}')   // normal style
+   * const repoRestApi = new RestApi(CTX + '/users/', 'name={name};team={team}')    // matrix var style
+   * const repoRestApi = new RestApi(CTX + '/users/', '{id}')                       // simple style
+   * const repoRestApi = new RestApi(CTX + '/users/', params => CTX+'/users/'+params.id)  // set a func
+   * @param baseUrl
+   * @param soloUrlTemplate function or string
+   */
   constructor (baseUrl, soloUrlTemplate) {
     this.baseUrl = baseUrl
     if (typeof soloUrlTemplate === 'string') {
@@ -39,12 +48,22 @@ export default class RestApi {
     }
   }
 
-  getSoloUrl (params) {
+  buildSoloUrl (params) {
     return this.soloUrlBuilder(params)
   }
 
-  readListAndCount (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = Urls.buildQueryUrl(this.baseUrl, params)
+  buildQueryUrl (params) {
+    return Urls.buildQueryUrl(this.baseUrl, params)
+  }
+
+  /**
+   * get a list of part and count of all by http GET request
+   * @param params
+   * @param okayCallback
+   * @param failCallback
+   */
+  getSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+    const finalUrl = this.buildQueryUrl(params)
     fetch(finalUrl, {method: 'GET'}).then(resp => {
       if (resp.ok) {
         const count = resp.headers.get('X-Total-Count')
@@ -55,12 +74,12 @@ export default class RestApi {
     })
   }
 
-  readOne (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.getSoloUrl(params)
+  get (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+    const finalUrl = this.buildSoloUrl(params)
     fetch(finalUrl, {method: 'GET'}).then(responding(okayCallback, failCallback))
   }
 
-  createOne (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  post (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
     const finalUrl = this.baseUrl
     var data = new FormData()
     data.append('json', JSON.stringify(params))
@@ -72,8 +91,8 @@ export default class RestApi {
       .then(responding2(okayCallback, failCallback))
   }
 
-  deleteOne (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.getSoloUrl(params)
+  delete (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+    const finalUrl = this.buildSoloUrl(params)
     fetch(finalUrl, {
       method: 'DELETE'
     })
@@ -81,17 +100,27 @@ export default class RestApi {
   }
 
   deleteSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = Urls.buildQueryUrl(this.baseUrl, params)
+    const finalUrl = this.buildQueryUrl(params)
     fetch(finalUrl, {
       method: 'DELETE'
     })
       .then(responding2(okayCallback, failCallback))
   }
 
-  updateOne (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.getSoloUrl(oldParams)
+  put (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+    const finalUrl = this.buildSoloUrl(oldParams)
     fetch(finalUrl, {
       method: 'PUT',
+      headers: defaultHeaders,
+      body: JSON.stringify(newParams)
+    })
+      .then(responding2(okayCallback, failCallback))
+  }
+
+  patch (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+    const finalUrl = this.buildSoloUrl(oldParams)
+    fetch(finalUrl, {
+      method: 'PATCH',
       headers: defaultHeaders,
       body: JSON.stringify(newParams)
     })

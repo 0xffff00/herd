@@ -1,14 +1,20 @@
 package party.threebody.herd.webapp.domain
 
+import party.threebody.skean.data.Column
+import party.threebody.skean.data.LastUpdateTime
+import party.threebody.skean.data.PrimaryKey
+
+import javax.persistence.Table
 import java.time.LocalDateTime
 
+@Table(name="hd_media_path")
 class Media {
-    String hash
-    String type
-    String subtype
-    String desc
-    Integer size
-    LocalDateTime syncTime
+    @PrimaryKey String hash
+    @Column String type
+    @Column String subtype
+    @Column String desc
+    @Column Integer size
+    @LastUpdateTime LocalDateTime syncTime
 
     //DTO fields
     List<MediaPath> paths
@@ -20,12 +26,13 @@ class Media {
     }
 
 }
+@Table(name="hd_media")
 class MediaPath {
-    String hash
-    String path
-    String type
-    String repoName
-    LocalDateTime syncTime
+    @PrimaryKey String hash
+    @PrimaryKey String path
+    @Column String type
+    @Column String repoName
+    @LastUpdateTime LocalDateTime syncTime
 
     MediaPath(){}
 

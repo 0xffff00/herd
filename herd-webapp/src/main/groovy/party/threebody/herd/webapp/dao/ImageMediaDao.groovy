@@ -3,50 +3,36 @@ package party.threebody.herd.webapp.dao
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import party.threebody.herd.webapp.domain.ImageMedia
-import party.threebody.skean.data.query.QueryParamsSuite
+import party.threebody.skean.data.query.CriteriaAndSortingAndPaging
 import party.threebody.skean.jdbc.ChainedJdbcTemplate
 import party.threebody.skean.jdbc.rs.DualColsBean
 import party.threebody.skean.jdbc.rs.TripleColsBean
-import party.threebody.skean.web.mvc.dao.SinglePKCrudDAO
+import party.threebody.skean.web.mvc.dao.SinglePKJpaCrudDAO
 
 import java.time.LocalDate
 
 @Repository
-class ImageMediaDao extends SinglePKCrudDAO<ImageMedia, String> {
+class ImageMediaDao extends SinglePKJpaCrudDAO<ImageMedia, String> {
 
     @Autowired
     ChainedJdbcTemplate cjt
 
     @Override
-    protected String getTable() {
-        'hd_media_image'
+    ChainedJdbcTemplate getChainedJdbcTemplate() {
+        return cjt
     }
 
     @Override
-    protected Class<ImageMedia> getBeanClass() {
-        ImageMedia.class
-    }
-
-    @Override
-    protected String getPrimaryKeyColumn() {
-        'hash'
-    }
-
-    @Override
-    protected List<String> getAffectedColumns() {
-        null
-    }
-
-    List<ImageMedia> listByHashs(Collection<String> hashs) {
-        fromTable().by('hash').val([hashs]).list(ImageMedia.class)
-    }
-
-    List<ImageMedia> list(QueryParamsSuite qps) {
+    List<ImageMedia> readList(CriteriaAndSortingAndPaging csp) {
         def sql = '''
 SELECT *,(SELECT size FROM hd_media m WHERE m.hash=mi.hash) file_size
 FROM hd_media_image mi
 '''
-        cjt.fromSql(sql).suite(qps).list(ImageMedia.class)
+        cjt.fromSql(sql).suite(csp).list(ImageMedia.class)
+    }
+
+    List<ImageMedia> listByHashs(Collection<String> hashs) {
+        fromTable().by('hash').val([hashs]).list(ImageMedia.class)
     }
 
     List<DualColsBean<LocalDate, Integer>> countByDate() {

@@ -1,41 +1,23 @@
 package party.threebody.herd.webapp.dao
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import party.threebody.herd.webapp.domain.Media
 import party.threebody.skean.jdbc.ChainedJdbcTemplate
 import party.threebody.skean.jdbc.util.CriteriaUtils
-import party.threebody.skean.web.mvc.dao.SinglePKCrudDAO
+import party.threebody.skean.web.mvc.dao.SinglePKJpaCrudDAO
 
 import java.time.LocalDateTime
 
 @Repository
-class MediaDao extends SinglePKCrudDAO<Media, String> {
+class MediaDao extends SinglePKJpaCrudDAO<Media, String> {
 
     @Autowired
     ChainedJdbcTemplate cjt
-    @Autowired
-    NamedParameterJdbcTemplate njt
 
     @Override
-    protected String getTable() {
-        'hd_media'
-    }
-
-    @Override
-    protected Class<Media> getBeanClass() {
-        Media.class
-    }
-
-    @Override
-    protected String getPrimaryKeyColumn() {
-        'hash'
-    }
-
-    @Override
-    protected List<String> getAffectedColumns() {
-        ['hash', 'type', 'subtype', 'desc', 'size', 'sync_time']
+    ChainedJdbcTemplate getChainedJdbcTemplate() {
+        return cjt
     }
 
     List<Media> listAll() {
@@ -59,14 +41,14 @@ WHERE sync_time=?
     }
 
     List<Media> listByHashs(Collection<String> hashs) {
-        def hash_IN=CriteriaUtils.buildClauseOfInStrs('hash',hashs)
+        def hash_IN = CriteriaUtils.buildClauseOfInStrs('hash', hashs)
         def sql = """
 SELECT m.*,
        (SELECT p.path FROM hd_media_path p WHERE p.hash=m.hash LIMIT 1) path0Path
 FROM hd_media m
 WHERE $hash_IN
 """
-       cjt.sql(sql).list(Media.class)
+        cjt.sql(sql).list(Media.class)
 
     }
 

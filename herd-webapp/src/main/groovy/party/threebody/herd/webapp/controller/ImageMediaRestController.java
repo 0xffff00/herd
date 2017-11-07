@@ -5,21 +5,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import party.threebody.herd.webapp.dao.ImageMediaDao;
 import party.threebody.herd.webapp.domain.ImageMedia;
 import party.threebody.herd.webapp.service.HerdService;
-import party.threebody.skean.web.mvc.controller.CrudFunctionsBuilder;
-import party.threebody.skean.web.mvc.controller.SinglePKCrudRestController;
+import party.threebody.skean.web.mvc.controller.SinglePKCrudFunctionsBuilder;
+import party.threebody.skean.web.mvc.controller.SinglePKUriVarCrudRestController;
+
 @RestController
 @RequestMapping("/imageMedias")
-public class ImageMediaRestController extends SinglePKCrudRestController<ImageMedia, String> {
+public class ImageMediaRestController extends SinglePKUriVarCrudRestController<ImageMedia, String> {
     @Autowired
     HerdService herdService;
 
+    @Autowired ImageMediaDao imageMediaDao;
     @Override
-    public void buildCrudFunctions(CrudFunctionsBuilder<ImageMedia, String> builder) {
-        builder.listReader(herdService::listImageMedias)
-                .countReader(herdService::countImageMedias);
+    public void buildCrudFunctions(SinglePKCrudFunctionsBuilder<ImageMedia, String> builder) {
+        builder.fromSinglePKCrudDAO(imageMediaDao);
     }
+
 
     @GetMapping("/countByDate")
     @ResponseBody

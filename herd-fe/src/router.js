@@ -4,6 +4,8 @@ import iView from 'iview'
 import Hello from '@/components/Hello'
 import Album2 from '@/views/Album2'
 import RepoMan from '@/views/RepoMan'
+import WordMan from '@/views/WordMan'
+import WordEdit from '@/views/WordEdit'
 
 Vue.use(VueRouter)
 Vue.use(iView)
@@ -23,6 +25,16 @@ const router = new VueRouter({
       path: '/repo-man',
       name: 'RepoMan',
       component: RepoMan
+    },
+    {
+      path: '/word-man',
+      name: 'WordMan',
+      component: WordMan
+    },
+    {
+      path: '/word-edit',
+      name: 'WordEdit',
+      component: WordEdit
     }
   ]
 })

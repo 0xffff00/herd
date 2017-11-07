@@ -9,15 +9,15 @@ import party.threebody.herd.webapp.service.HerdService;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/herd")
-public class HerdController {
+@RequestMapping("/file")
+public class FileController {
 
     @Autowired
     HerdService herdService;
 
 
     @ResponseBody
-    @GetMapping(value = "/pic2/{hash}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/{hash}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> testphoto(@PathVariable String hash,
                                             @RequestParam(name = "cache", required = false) String cacheCategory) {
         try {

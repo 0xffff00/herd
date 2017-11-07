@@ -34,7 +34,16 @@
             <MenuItem name="3-4">用户留存</MenuItem>
             <MenuItem name="3-5">流失用户</MenuItem>
           </MenuGroup>
-        </Submenu>s
+        </Submenu>
+        <router-link to="/word-man">
+          <MenuItem name="词汇管理">
+            <Icon type="ios-folder-outline"></Icon>
+            词汇管理
+          </MenuItem></router-link>
+        <router-link to="/word-edit">
+          <MenuItem name="词汇编辑">
+            词汇编辑
+          </MenuItem></router-link>
 
       </div>
     </Menu>

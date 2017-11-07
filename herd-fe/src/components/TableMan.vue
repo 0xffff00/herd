@@ -24,7 +24,7 @@
         <div class="pager rt">
           <Page :page-size-opts="[3,5,10, 20 ,30, 50, 100]"
                 :page-size="querier.pageSize" :current.sync="querier.pageNum" :total="data.result.totalCount"
-                size="small" show-total show-elevator show-sizer></Page>
+                size="small" show-total show-elevator show-sizer @on-page-size-change="pageSizeChanged"></Page>
         </div>
       </slot>
     </div>
@@ -58,7 +58,7 @@
   import _ from 'lodash'
 
   export default {
-    name: 'simple-man2',
+    name: 'table-man',
     data () {
       return {}
     },
@@ -84,19 +84,17 @@
 
           if (x['sk-template'] === 'action') {
             y.editable = false
-            y.render = (h, params) => {
-              return h('div', {}, [
-                rPopDel(self)(h, params),
-                rBtnEdit(self)(h, params)
-              ])
-            }
+            y.render = (h, params) => h('div', {}, [
+              rPopDel(self)(h, params),
+              rBtnEdit(self)(h, params)
+            ])
+
             console.log(y)
           }
 
-//          if (y.type === 'sk-template' && y.template === 'sk.man2.state') {
-//            const stateMap = {'A': '活动', 'S': '停止'}
-//            y.render = (item, column) => stateMap[item[column.name]]
-//          }
+          if (x['sk-template'] === 'sk.man2.state') {
+            y.render = rState(self)(y.key)
+          }
           return y
         })
         return {
@@ -145,7 +143,7 @@
       readItems () {
         let self = this
         self.ui.loading = true
-        self.model.api.readListAndCount(
+        self.model.api.getSome(
           self.translatedQuerierParams,
           d => {
             self.data.result.items = d.items
@@ -159,24 +157,23 @@
       deleteItem () {
         const self = this
         self.ui.deleting = true
-        self.model.api.deleteOne(self.data.deleter.item, self.notifyOkay('删除'), self.notifyFail('删除'))
+        self.model.api.delete(self.data.deleter.item, self.notifyOkay('删除'), self.notifyFail('删除'))
       },
       saveItem () {
         const self = this
         this.ui.saving = true
         const isNew = self.data.editor.itemOld === null
         if (isNew) {
-          self.model.api.createOne(self.data.editor.item, self.notifyOkay('创建'), self.notifyFail('创建'))
+          self.model.api.post(self.data.editor.item, self.notifyOkay('创建'), self.notifyFail('创建'))
         } else {
           const changes = changesOfItem(self.data.editor.itemOld, self.data.editor.item, self.model.columns)
-          self.model.api.updateOne(self.data.editor.itemOld, changes, self.notifyOkay('更新'), self.notifyFail('更新'))
+          self.model.api.patch(self.data.editor.itemOld, changes, self.notifyOkay('更新'), self.notifyFail('更新'))
         }
       },
 
       initEditor () {
         let item = this.data.editor.item
         this.data.editor.itemOld = _.cloneDeep(item)
-        console.log(this.data.editor.itemOld, item)
         if (item === null) {
           this.data.editor.item = _.cloneDeep(this.data.editor.itemDefault)
         }
@@ -195,7 +192,7 @@
       notifyOkay (what) {
         const self = this
         return d => {
-          let msg = d ? (d.message || d.totalAffected) : ''
+          let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + what : '')
           self.$notify.success({title: what + '成功', message: msg})
           self.ui.editing = false
           self.ui.saving = false
@@ -211,6 +208,9 @@
           self.ui.deleting = false
           self.ui.loading = false
         }
+      },
+      pageSizeChanged (pageSize) {
+        this.querier.pageSize = pageSize
       }
     },
     watch: {
@@ -220,7 +220,7 @@
       'querier.pageNum': function (v) {
         this.readItems()
       },
-      'querier.pageSize': function (v) {
+      'querier.pageSize': function (v) {  // iview Page does not support pageSize.sync
         this.readItems()
       },
       'ui.editTick': function () {
@@ -231,19 +231,24 @@
           this.initEditor()
         }
       },
-      'data.deleter.item': function (v) {
-        if (v === null) {
-          return
-        }
-        this.openDeleteConfirmDialog()
+      'ui.editor.title': function () {
+        let n = this.itemName
+        return (this.ui.currItem) ? '新增' + n : '修改' + n
       }
+//      'data.deleter.item': function (v) {
+//        if (v === null) {
+//          return
+//        }
+//        this.openDeleteConfirmDialog()
+//      }
     }
   }
 
-  function changesOfItem (newItem, oldItem, itemCols) {
+  function changesOfItem (oldItem, newItem, itemCols) {
     let keysPicked = Object.keys(newItem)
       .filter(k => itemCols.find(col => col.name === k && col.editable) !== null)
       .filter(k => oldItem[k] !== newItem[k])
+    console.log(newItem, oldItem, itemCols, keysPicked, _.pick(newItem, keysPicked))
     return _.pick(newItem, keysPicked)
   }
 
@@ -265,8 +270,7 @@
   })
 
   const rPopDel = vue => (h, params) => h(
-    'Poptip',
-    {
+    'Poptip', {
       props: {
         confirm: true,
         title: '您确认删除这条内容吗？'
@@ -292,6 +296,40 @@
       })
     ]
   )
+
+  const rState = vue => (key) => (h, params) => {
+    const stateMap = {
+      'A': {text: '活动', color: 'green'},
+      'S': {text: '停止', color: 'red'}
+    }
+    let val = params.row[key]
+    if (!val) {
+      return null
+    }
+    let v = stateMap[val] || {text: val, color: undefined}
+    return h(
+      'Tag', {
+        props: {color: v.color}
+      },
+      v.text
+    )
+  }
+
+  const rRadio = vue => (valMap) => (h, params) => {
+    let radiosArr = valMap.keys().map(k => {
+      let v = valMap[k]
+      return h('Radio', {props: {label: v}}, k)
+    })
+    return h(
+      'RadioGroup', {
+        props: {
+          type: 'button'
+        }
+      },
+      radiosArr
+    )
+  }
+
 </script>
 
 <style scoped>

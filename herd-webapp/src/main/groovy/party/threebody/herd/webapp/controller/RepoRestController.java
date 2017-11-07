@@ -2,42 +2,40 @@ package party.threebody.herd.webapp.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import party.threebody.herd.webapp.dao.RepoDao;
 import party.threebody.herd.webapp.domain.Media;
 import party.threebody.herd.webapp.domain.MediaPath;
 import party.threebody.herd.webapp.domain.Repo;
 import party.threebody.herd.webapp.service.HerdService;
 import party.threebody.herd.webapp.util.ImageConverter;
-import party.threebody.skean.data.query.QueryParamsBuildUtils;
-import party.threebody.skean.data.query.QueryParamsSuite;
+import party.threebody.skean.data.query.CriteriaAndSortingAndPaging;
 import party.threebody.skean.data.result.Counts;
-import party.threebody.skean.web.mvc.controller.ControllerUtils;
-import party.threebody.skean.web.mvc.controller.CrudFunctionsBuilder;
-import party.threebody.skean.web.mvc.controller.SinglePKCrudRestController;
+import party.threebody.skean.web.data.CriteriaBuilder;
+import party.threebody.skean.web.mvc.MultiValueMaps;
+import party.threebody.skean.web.mvc.controller.SinglePKCrudFunctionsBuilder;
+import party.threebody.skean.web.mvc.controller.SinglePKUriVarCrudRestController;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/repo")
-public class RepoRestController extends SinglePKCrudRestController<Repo, String> {
+@RequestMapping("/repos")
+public class RepoRestController extends SinglePKUriVarCrudRestController<Repo, String> {
 
-    @Autowired
-    HerdService herdService;
+    @Autowired HerdService herdService;
+    @Autowired RepoDao repoDao;
+
+    @Autowired CriteriaBuilder criteriaBuilder;
 
     @Override
-    public void buildCrudFunctions(CrudFunctionsBuilder<Repo, String> builder) {
-        builder.listReader(herdService::listRepos)
-                .countReader(herdService::countRepos)
-                .oneReader(herdService::getRepo)
-                .creator(herdService::createRepo)
-                .entireUpdater(herdService::updateRepo)
-                .partialUpdater(herdService::partialUpdateRepo)
-                .pkGetter(Repo::getName);
-
+    public void buildCrudFunctions(SinglePKCrudFunctionsBuilder<Repo, String> builder) {
+        builder.fromSinglePKCrudDAO(repoDao);
     }
 
     /**
@@ -51,12 +49,11 @@ public class RepoRestController extends SinglePKCrudRestController<Repo, String>
      * @return
      */
     @PostMapping("/advanced/repos")
-    public ResponseEntity<Object> actOnRepos(@RequestParam Map<String, String> reqestParamMap, @RequestParam("action") String action) {
-        QueryParamsSuite qps = QueryParamsBuildUtils.buildQueryParamsSuiteByPLOx(
-                reqestParamMap,
-                Arrays.asList("name")
-        );
-        List<Repo> repos = herdService.listRepos(qps);
+    public ResponseEntity<Object> actOnRepos(@RequestParam MultiValueMap<String, String> reqestParamMap,
+                                             @RequestParam("action") String action) {
+        CriteriaAndSortingAndPaging csp = criteriaBuilder
+                .toCriteriaAndSortingAndPaging(MultiValueMaps.toMap(reqestParamMap));
+        List<Repo> repos = herdService.listRepos(csp);
         List<String> repoNames = repos.stream().map(Repo::getName).collect(Collectors.toList());
         List<MediaPath> mediaPaths = herdService.listMediaPathByRepoNames(repoNames);
         List<Media> medias = herdService.listMediasByRepoNames(repoNames);
