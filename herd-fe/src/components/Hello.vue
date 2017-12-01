@@ -21,7 +21,7 @@
 </template>
 
 <script>
-  import { multiply } from '../utils/1'
+  import { multiply } from '../learn/1'
 
   function m1 (x, y) {
     return x * y

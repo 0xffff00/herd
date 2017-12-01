@@ -1,8 +1,10 @@
 import fetch from 'node-fetch'
 import Urls from '../utils/Urls'
 import RestApi from '../utils/RestApi'
+import appConf from '../../config/app-conf'
 
-const CTX = 'http://localhost:8980'
+const CTX = appConf.apis.herd.url
+
 const ajaxList = url => (params, callback) => {
   let realUrl = Urls.buildQueryUrl(url, params)
   fetch(realUrl).then(r => r.json()).then(callback)

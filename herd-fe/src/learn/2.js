@@ -3,6 +3,7 @@ import _ from 'lodash'
 
 multiply(3, 4)
 
+
 function foo (a, b, ...rest) {
   console.log('a = ' + a)
   console.log('b = ' + b)
