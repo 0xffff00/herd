@@ -40,7 +40,7 @@
             <Icon type="ios-folder-outline"></Icon>
             词汇管理
           </MenuItem></router-link>
-        <router-link to="/word-edit">
+        <router-link to="/words/复旦大学/edit">
           <MenuItem name="词汇编辑">
             词汇编辑
           </MenuItem></router-link>

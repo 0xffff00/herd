@@ -32,7 +32,7 @@ const router = new VueRouter({
       component: WordMan
     },
     {
-      path: '/word-edit',
+      path: '/words/:text/edit',
       name: 'WordEdit',
       component: WordEdit
     }

@@ -143,7 +143,7 @@
       readItems () {
         let self = this
         self.ui.loading = true
-        self.model.api.getSome(
+        self.model.api.httpGetSome(
           self.translatedQuerierParams,
           d => {
             self.data.result.items = d.items
@@ -157,17 +157,17 @@
       deleteItem () {
         const self = this
         self.ui.deleting = true
-        self.model.api.delete(self.data.deleter.item, self.notifyOkay('删除'), self.notifyFail('删除'))
+        self.model.api.httpDelete(self.data.deleter.item, self.notifyOkay('删除'), self.notifyFail('删除'))
       },
       saveItem () {
         const self = this
         this.ui.saving = true
         const isNew = self.data.editor.itemOld === null
         if (isNew) {
-          self.model.api.post(self.data.editor.item, self.notifyOkay('创建'), self.notifyFail('创建'))
+          self.model.api.httpPost(self.data.editor.item, self.notifyOkay('创建'), self.notifyFail('创建'))
         } else {
           const changes = changesOfItem(self.data.editor.itemOld, self.data.editor.item, self.model.columns)
-          self.model.api.patch(self.data.editor.itemOld, changes, self.notifyOkay('更新'), self.notifyFail('更新'))
+          self.model.api.httpPatch(self.data.editor.itemOld, changes, self.notifyOkay('更新'), self.notifyFail('更新'))
         }
       },
 
@@ -203,7 +203,12 @@
       notifyFail (what) {
         const self = this
         return d => {
-          self.$notify.error({title: what + '失败', message: d.message, duration: 0})
+          let msg = '[<b>' + d.error + '</b>] '
+          msg += (d.message || '')
+          if (d.debugInfo) {
+            msg += d.debugInfo.message
+          }
+          self.$notify.error({title: what + '失败', message: msg, duration: 0})
           self.ui.saving = false
           self.ui.deleting = false
           self.ui.loading = false

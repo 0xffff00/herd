@@ -1,4 +1,4 @@
-class DAGVisitor {
+export default class DAGVisitor {
   constructor (edges, edgeToVertex0, edgeToVertex1) {
     this.edges = edges
     this.edgeToVertex0 = edgeToVertex0

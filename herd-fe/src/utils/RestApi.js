@@ -62,7 +62,7 @@ export default class RestApi {
    * @param okayCallback
    * @param failCallback
    */
-  getSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpGetSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
     const finalUrl = this.buildQueryUrl(params)
     fetch(finalUrl, {method: 'GET'}).then(resp => {
       if (resp.ok) {
@@ -74,12 +74,12 @@ export default class RestApi {
     })
   }
 
-  get (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpGet (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
     const finalUrl = this.buildSoloUrl(params)
     fetch(finalUrl, {method: 'GET'}).then(responding(okayCallback, failCallback))
   }
 
-  post (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpPost (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
     const finalUrl = this.baseUrl
     var data = new FormData()
     data.append('json', JSON.stringify(params))
@@ -91,7 +91,7 @@ export default class RestApi {
       .then(responding2(okayCallback, failCallback))
   }
 
-  delete (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpDelete (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
     const finalUrl = this.buildSoloUrl(params)
     fetch(finalUrl, {
       method: 'DELETE'
@@ -99,7 +99,7 @@ export default class RestApi {
       .then(responding2(okayCallback, failCallback))
   }
 
-  deleteSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpDeleteSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
     const finalUrl = this.buildQueryUrl(params)
     fetch(finalUrl, {
       method: 'DELETE'
@@ -107,7 +107,7 @@ export default class RestApi {
       .then(responding2(okayCallback, failCallback))
   }
 
-  put (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpPut (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
     const finalUrl = this.buildSoloUrl(oldParams)
     fetch(finalUrl, {
       method: 'PUT',
@@ -117,7 +117,7 @@ export default class RestApi {
       .then(responding2(okayCallback, failCallback))
   }
 
-  patch (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpPatch (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
     const finalUrl = this.buildSoloUrl(oldParams)
     fetch(finalUrl, {
       method: 'PATCH',

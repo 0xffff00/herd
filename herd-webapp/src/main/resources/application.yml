@@ -9,5 +9,15 @@ spring:
 
 server:
   port: 8980
+
+logging:
+  level:
+    party.threebody.skean.jdbc: DEBUG
+
+skean:
+  jdbc:
+    sql-printer:
+      print-sql-result-strategy: REFLECTION
+
 herd:
   localThumbnailRepoPath: D:/tmp/herdThumbs

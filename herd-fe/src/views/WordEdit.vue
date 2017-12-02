@@ -1,13 +1,13 @@
 <template>
   <div id="word-manager">
-    <h1>{{item.text}} - 详情</h1>
+    <h1>{{word.text}} - 详情</h1>
     <h2>别名</h2>
     <div id="alias-rels">
-      <Tag :key="r" v-for="r in item.aliasRels" :closable="true"
+      <Tag :key="r" v-for="r in word.aliasRels" :closable="true"
            @on-close="del$ar(r)">
         <a :href="url$w(r.val)">{{r.val}}</a>
       </Tag>
-      <Input class="adder" size="small" placeholder="添加新别名" @on-enter="add$ar"/>
+      <Input class="adder" size="small" placeholder="添加新别名" v-model="editor.newAliasText" @on-enter="add$ar"/>
     </div>
     <h2>定义与实例</h2>
     <div id="dual-rels-inst">
@@ -83,7 +83,7 @@
                @on-close="del$gr1v(r)">
             <a :href="url$w(r.val)">{{r.val}}</a>
           </Tag>
-          <Input class="adder" size="small" placeholder="关联新属性值" @on-enter="add$gr1v(rels,$event)" />
+          <Input class="adder" size="small" placeholder="关联新属性值" @on-enter="add$gr1v(rels,$event)"/>
 
         </li>
         <li>
@@ -175,7 +175,7 @@
     name: 'word-edit',
     data () {
       return {
-        item: {
+        word: {
           text: null,
           aliasRels: [],
           dualRels: [],
@@ -183,6 +183,7 @@
           ge2Rels: []
         },
         editor: {
+          newAliasText: '',
           adder: {
             ge1Rel: {pred: 'HAS'},
             ge2Rel: {pred: 'HAS'}
@@ -196,25 +197,25 @@
     },
     computed: {
       me: function () {
-        return this.item.text
+        return this.word.text
       },
       drels_subs: function () {
-        return this.item.dualRels.filter(r => r.attr === 'SUBS')
+        return this.word.dualRels.filter(r => r.attr === 'SUBS')
       },
       drels_inst: function () {
-        return this.item.dualRels.filter(r => r.attr === 'INST')
+        return this.word.dualRels.filter(r => r.attr === 'INST')
       },
       drels_gech: function () {
-        return this.item.dualRels.filter(r => r.attr === 'GECH')
+        return this.word.dualRels.filter(r => r.attr === 'GECH')
       },
       grels_attr1: function () {
-        return this.item.ge1Rels.filter(r => r.key === this.me)
+        return this.word.ge1Rels.filter(r => r.key === this.me)
       },
       grels_attr2: function () {
-        return this.item.ge2Rels.filter(r => r.key === this.me)
+        return this.word.ge2Rels.filter(r => r.key === this.me)
       },
       grels_refer: function () {
-        return this.item.ge1Rels.filter(r => r.val === this.me)
+        return this.word.ge1Rels.filter(r => r.val === this.me)
       },
 
       /* rs0: arr of rels shallow
@@ -300,19 +301,28 @@
       },
 
       ns0_attributes2: function () {
-        return this.item.ge2Rels.filter(e => e.key === this.me).map(e => e.val)
+        return this.word.ge2Rels.filter(e => e.key === this.me).map(e => e.val)
       },
       ns0releferences: function () {
-        return this.item.ge1Rels.filter(e => e.val === this.me).map(e => e.key)
+        return this.word.ge1Rels.filter(e => e.val === this.me).map(e => e.key)
       }
     },
+    created () {
+      let params = this.$route.params
+      this.word.text = params.text
+      console.log(this.word)
+      this.loadItem()
+    },
     methods: {
-      add$ar (evt) {  // add alias rel
+      /**
+       * add alias rel
+       */
+      add$ar () {
         const self = this
-        let _vv = evt.target.value
-        if (!_vv) return
-        let rel = {key: this.item.text, val: _vv}
-        DictApi.aliasRels.post(rel, self.notifyOkay('添加别名'), self.notifyFail('添加别名'))
+        let v = self.editor.newAliasText
+        if (!v) return
+        let rel = {key: this.word.text, val: v}
+        DictApi.aliasRels.httpPost(rel, self.notifyOkay('添加别名'), self.notifyFail('添加别名'))
       },
       // ------------ dualRels ---------------
       /**
@@ -346,9 +356,9 @@
             rel = {key: _vv, attr: 'GECH', val: _me}
             break
         }
-        let OldVnoArr = this.item.dualRels.filter(r => r.key === rel.key && r.attr === rel.attr).map(r => r.vno)
+        let OldVnoArr = this.word.dualRels.filter(r => r.key === rel.key && r.attr === rel.attr).map(r => r.vno)
         rel.vno = OldVnoArr.length ? _.max(OldVnoArr.map(x => +x)) + 1 : 0
-        DictApi.dualRels.post(rel, self.notifyOkay('添加' + name), self.notifyFail('添加' + name))
+        DictApi.dualRels.httpPost(rel, self.notifyOkay('添加' + name), self.notifyFail('添加' + name))
       },
       /**
        * del dualRel
@@ -356,7 +366,7 @@
        */
       del$dr (rel) {
         const self = this
-        DictApi.dualRels.delete(rel, self.notifyOkay('移除关联'), self.notifyFail('移除关联'))
+        DictApi.dualRels.httpDelete(rel, self.notifyOkay('移除关联'), self.notifyFail('移除关联'))
       },
 
       // ------------ gel1Rels ---------------
@@ -374,7 +384,7 @@
         let key = relsOld[0].key
         let attr = relsOld[0].attr
         let rel = {key: key, pred: pred, attr: attr, attrx: null, vno: vno, val: valNew}
-        DictApi.ge1Rels.post(rel, () => {
+        DictApi.ge1Rels.httpPost(rel, () => {
           self.notifyOkay('关联新属性值')
           evt.target.value = ''
           this.loadItem()
@@ -386,7 +396,7 @@
        */
       del$gr1v (rel) {
         const self = this
-        DictApi.ge1Rels.delete(rel, self.notifyOkay('移除属性值'), self.notifyFail('移除属性值'))
+        DictApi.ge1Rels.httpDelete(rel, self.notifyOkay('移除属性值'), self.notifyFail('移除属性值'))
       },
       /**
        *  add ge1Rel
@@ -394,10 +404,10 @@
       add$gr1 () {
         const self = this
         let rel = this.editor.adder.ge1Rel
-        rel.key = self.item.text
+        rel.key = self.word.text
         rel.vno = -1
         rel.val = rel.vals
-        DictApi.ge1Rels.post(rel, self.notifyOkay('添加新属性'), self.notifyFail('添加新属性'))
+        DictApi.ge1Rels.httpPost(rel, self.notifyOkay('添加新属性'), self.notifyFail('添加新属性'))
       },
       /**
        * del ge1Rel vals by attr
@@ -405,8 +415,8 @@
        */
       del$gr1 (attr) {
         const self = this
-        let rel = {key: self.item.text, attr: attr}
-        DictApi.ge1Rels.delete(rel, self.notifyOkay('移除属性'), self.notifyFail('移除属性'))
+        let rel = {key: self.word.text, attr: attr}
+        DictApi.ge1Rels.httpDelete(rel, self.notifyOkay('移除属性'), self.notifyFail('移除属性'))
       },
       // ------------ gel2Rels ---------------
       /**
@@ -431,7 +441,7 @@
           rel.valstr = valNew
           rel.valnum = null
         }
-        DictApi.ge2Rels.post(rel, () => {
+        DictApi.ge2Rels.httpPost(rel, () => {
           self.notifyOkay('关联新属性II值')
           evt.target.value = ''
           this.loadItem()
@@ -443,7 +453,7 @@
        */
       del$gr2v (rel) {
         const self = this
-        DictApi.ge2Rels.delete(rel, self.notifyOkay('移除属性II值'), self.notifyFail('移除属性II值'))
+        DictApi.ge2Rels.httpDelete(rel, self.notifyOkay('移除属性II值'), self.notifyFail('移除属性II值'))
       },
       /**
        * add ge2Rel
@@ -451,7 +461,7 @@
       add$gr2 () {
         const self = this
         let rel = this.editor.adder.ge2Rel
-        rel.key = self.item.text
+        rel.key = self.word.text
         rel.vno = 0
         if (!_.isNaN(+rel.vals)) {
           rel.valnum = rel.vals
@@ -460,7 +470,7 @@
           rel.valstr = rel.vals
           rel.valnum = null
         }
-        DictApi.ge2Rels.post(rel, self.notifyOkay('添加属性II'), self.notifyFail('添加属性II'))
+        DictApi.ge2Rels.httpPost(rel, self.notifyOkay('添加属性II'), self.notifyFail('添加属性II'))
       },
       /**
        * del ge2Rel vals by attr
@@ -468,8 +478,8 @@
        */
       del$gr2 (attr) {
         const self = this
-        let rel = {key: self.item.text, attr: attr}
-        DictApi.ge2Rels.post(rel, self.notifyOkay('移除属性II'), self.notifyFail('移除属性II'))
+        let rel = {key: self.word.text, attr: attr}
+        DictApi.ge2Rels.httpDelete(rel, self.notifyOkay('移除属性II'), self.notifyFail('移除属性II'))
       },
 
       // ------------ misc ---------------
@@ -484,12 +494,12 @@
 
       loadItem () {
         const self = this
-        let w = this.item.text
+        let w = this.word.text
         if (!w) {
           return
         }
-        DictApi.words.get(w, (d) => {
-          self.item = d
+        DictApi.words.httpGet(this.word, (d) => {
+          self.word = d
           self.ui.loading = false
         }, self.notifyFail('加载词汇'))
       },
