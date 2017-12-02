@@ -1,6 +1,7 @@
 import RestApi from '../utils/RestApi'
+import appConf from '../../config/app-conf'
 
-const CTX = 'http://localhost:8080'
+const CTX = appConf.apis.dict.url
 
 const words = new RestApi(CTX + '/words/', '{text}')
 const aliasRels = new RestApi(CTX + '/alias-rels/', 'key={key};attr={attr};vno={vno}')
