@@ -3,72 +3,65 @@
     <h1>{{word.text}} - 详情</h1>
     <h2>别名</h2>
     <div id="alias-rels">
-      <Tag :key="r" v-for="r in word.aliasRels" :closable="true"
-           @on-close="del$ar(r)">
+      <Tag v-for="r in word.aliasRels" :closable="true" @on-close="delAR(r)">
         <a :href="url$w(r.val)">{{r.val}}</a>
       </Tag>
-      <Input class="adder" size="small" placeholder="添加新别名" v-model="editor.newAliasText" @on-enter="add$ar"/>
+      <Input class="adder" size="small" placeholder="添加新别名" v-model="editor.newAliasText" @on-enter="addAR"/>
     </div>
     <h2>定义与实例</h2>
     <div id="dual-rels-inst">
       <h3>直接类型</h3>
-      <Tag :key="r" v-for="r in rs0_definitions" :closable="true"
-           @on-close="del$dr(r)">
+      <Tag v-for="r in rs0_definitions" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.key)">{{r.key}}</a>
       </Tag>
-      <Input name="definition" class="adder" size="small" placeholder="关联新类型" @on-enter="add$dr"/>
+      <Input name="definition" class="adder" size="small" placeholder="关联新类型" @on-enter="addDR"/>
       <h3>所有超类</h3>
-      <Tag :key="w" v-for="w in nsr_definitions" type="success"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in nsr_definitions"><a :href="url$w(w)">{{w}}</a></Tag>
 
       <h3>直接实例</h3>
-      <Tag :key="r" v-for="r in rs0_instances" :closable="true"
-           @on-close="del$dr(r)">
+      <Tag v-for="r in rs0_instances" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.val)">{{r.val}}</a>
       </Tag>
-      <Input name="instance" class="adder" size="small" placeholder="关联新实例" @on-enter="add$dr"/>
+      <Input name="instance" class="adder" size="small" placeholder="关联新实例" @on-enter="addDR"/>
       <h3>所有实例</h3>
-      <Tag :key="w" v-for="w in nsr_instances" type="success"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in nsr_instances"><a :href="url$w(w)">{{w}}</a></Tag>
     </div>
 
     <h2>集合</h2>
     <div id="dual-rels-subs">
       <h3>直接子集</h3>
-      <Tag :key="r" v-for="r in rs0_subsets" :closable="true"
-           @on-close="del$dr(r)">
+      <Tag v-for="r in rs0_subsets" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.val)">{{r.val}}</a>
       </Tag>
-      <Input name="subset" class="adder" size="small" placeholder="关联新子集" @on-enter="add$dr"/>
+      <Input name="subset" class="adder" size="small" placeholder="关联新子集" @on-enter="addDR"/>
 
       <h3>所有子集</h3>
-      <Tag :key="w" v-for="w in nsr_subsets" type="success"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in nsr_subsets"><a :href="url$w(w)">{{w}}</a></Tag>
       <h3>直接超集</h3>
-      <Tag :key="r" v-for="r in rs0_supersets" :closable="true"
-           @on-close="del$dr(r)">
+      <Tag v-for="r in rs0_supersets" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.key)">{{r.key}}</a>
       </Tag>
-      <Input name="superset" class="adder" size="small" placeholder="关联新超集" @on-enter="add$dr"/>
+      <Input name="superset" class="adder" size="small" placeholder="关联新超集" @on-enter="addDR"/>
       <h3>所有超集</h3>
-      <Tag :key="w" v-for="w in nsr_supersets" type="success"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in nsr_supersets"><a :href="url$w(w)">{{w}}</a></Tag>
     </div>
 
     <h2>相关话题</h2>
     <div id="dual-rels-gech">
       <h3>直接子话题</h3>
-      <Tag :key="r" v-for="r in rs0_subtopics" :closable="true"
-           @on-close="del$dr(r)">
+      <Tag v-for="r in rs0_subtopics" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.val)">{{r.val}}</a>
       </Tag>
-      <Input name="subtopic" class="adder" size="small" placeholder="关联新子话题" @on-enter="add$dr"/>
+      <Input name="subtopic" class="adder" size="small" placeholder="关联新子话题" @on-enter="addDR"/>
       <h3>所有子话题</h3>
-      <Tag :key="w" v-for="w in nsr_subtopics" type="success"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in nsr_subtopics"><a :href="url$w(w)">{{w}}</a></Tag>
       <h3>直接父话题</h3>
-      <Tag :key="r" v-for="r in rs0_supertopics" :closable="true"
-           @on-close="del$dr(r)">
+      <Tag v-for="r in rs0_supertopics" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.key)">{{r.key}}</a></Tag>
       <Input name="supertopic" class="adder" size="small" placeholder="关联新父话题"
-             @on-enter="add$dr"/>
+             @on-enter="addDR"/>
       <h3>所有父话题</h3>
-      <Tag :key="w" v-for="w in nsr_supertopics" type="success"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in nsr_supertopics"><a :href="url$w(w)">{{w}}</a></Tag>
     </div>
 
 
@@ -77,13 +70,12 @@
       <h3>属性</h3>
       <ul>
         <li v-for="(rels,attr) in rmg_attr1">
-          <el-button type="danger" size="small" @click="del$gr1(attr)"><i class="fa fa-times"></i></el-button>
+          <el-button type="danger" size="small" @click="delG1R(attr)"><i class="fa fa-times"></i></el-button>
           <span class="attrName">{{attr}}</span> {{translate_pred(rels[0].pred)}}
-          <Tag :key="r" v-for="r in rels" :closable="true"
-               @on-close="del$gr1v(r)">
+          <Tag v-for="r in rels" :closable="true" @on-close="delG1Rv(r)">
             <a :href="url$w(r.val)">{{r.val}}</a>
           </Tag>
-          <Input class="adder" size="small" placeholder="关联新属性值" @on-enter="add$gr1v(rels,$event)"/>
+          <Input class="adder" size="small" placeholder="关联新属性值" @on-enter="addG1Rv(rels,$event)"/>
 
         </li>
         <li>
@@ -101,10 +93,10 @@
             </el-form-item>
             <el-form-item>
               <Input v-model="editor.adder.ge1Rel.vals" placeholder="属性值，若填多个以空格隔开" size="small"
-                     @on-enter="add$gr1" style="width:280px;"></Input>
+                     @on-enter="addG1R" style="width:280px;"></Input>
             </el-form-item>
             <el-form-item>
-              <el-button type="success" size="small" @click="add$gr1"><i class="fa fa-plus"></i></el-button>
+              <el-button type="success" size="small" @click="addG1R"><i class="fa fa-plus"></i></el-button>
             </el-form-item>
           </el-form>
         </li>
@@ -112,14 +104,13 @@
       <h3>属性（值）</h3>
       <ul>
         <li v-for="(rels,attr) in rmg_attr2">
-          <el-button type="danger" size="small" @click="del$gr2(attr)"><i class="fa fa-times"></i></el-button>
+          <el-button type="danger" size="small" @click="delG2R(attr)"><i class="fa fa-times"></i></el-button>
           <span class="attrName">{{attr}}</span> {{translate_pred(rels[0].pred)}}
-          <Tag :key="r" v-for="r in rels" :closable="true" type="gray"
-               @on-close="del$gr2v(r)">
+          <Tag v-for="r in rels" :closable="true" @on-close="delG2Rv(r)">
             <span class="valnum">{{r.valnum}}</span><span class="valstr">{{r.valstr}}</span> {{r.valmu}}
           </Tag>
           <Input class="adder" size="small" placeholder="关联新属性值"
-                 @on-enter="add$gr2v(rels,$event)"></Input>
+                 @on-enter="addG2Rv(rels,$event)"></Input>
 
         </li>
         <li>
@@ -137,14 +128,14 @@
             </el-form-item>
             <el-form-item>
               <Input v-model="editor.adder.ge2Rel.vals" placeholder="属性值" size="small"
-                     @on-enter="add$gr2" style="width:230px;"></Input>
+                     @on-enter="addG2R" style="width:230px;"></Input>
             </el-form-item>
             <el-form-item>
               <Input v-model="editor.adder.ge2Rel.valmu" placeholder="量词" size="small"
-                     @on-enter="add$gr2" style="width:60px;"></Input>
+                     @on-enter="addG2R" style="width:60px;"></Input>
             </el-form-item>
             <el-form-item>
-              <el-button type="success" size="small" @click="add$gr2"><i class="fa fa-plus"></i></el-button>
+              <el-button type="success" size="small" @click="addG2R"><i class="fa fa-plus"></i></el-button>
             </el-form-item>
           </el-form>
         </li>
@@ -154,7 +145,7 @@
 
       <h3>引用</h3>
       <ul>
-        <li v-for="rel in grels_refer">
+        <li v-for="rel in ge1Rels_refer">
           <a :href="url$w(rel.key)">{{rel.key}}</a> 的 {{rel.attr}} {{translate_pred(rel.pred)
           }} {{rel.val}}
         </li>
@@ -171,16 +162,41 @@
   import Objects from '../utils/Objects'
   import DictApi from '../apis/DictApi'
 
+  /**
+   * ---Coding Naming Conventions---
+   * ES0, EntSet0: Entity Set shallow
+   * ESR, EntSetR: Entity Set recursive
+   * RS0, RelSet0: Relation Set shallow
+   * RSR, RelSetR: Relation Set recursive
+   * RMG: rel map grouped
+   */
+
+  function fetchNSR (me, edges, forward) {
+    let visitor = forward ? new DAGVisitor(me, edges, e => e.src, e => e.dst) : new DAGVisitor(me, edges, e => e.dst, e => e.src)
+    visitor.visitFrom(me)
+    let res = new Set(visitor.getVerticesVisited())
+    res.delete(me)
+    return res
+  }
+
   export default {
     name: 'word-edit',
     data () {
       return {
         word: {
           text: null,
-          aliasRels: [],
-          dualRels: [],
-          ge1Rels: [],
-          ge2Rels: []
+          desc: null,
+          state: null,
+          updateTime: null,
+          aliasRelSet0: [],
+          subsetRelSetR: [],
+          supersetRelSetR: [],
+          instanceRelSetR: [],
+          definitionRelSetR: [],
+          subtopicRelSetR: [],
+          supertopicRelSetR: [],
+          attributeRelSet0: [],
+          referenceRelSet0: []
         },
         editor: {
           newAliasText: '',
@@ -199,103 +215,92 @@
       me: function () {
         return this.word.text
       },
-      drels_subs: function () {
-        return this.word.dualRels.filter(r => r.attr === 'SUBS')
+
+      // --------- RS0 ---------
+      subsetRS0: function () {
+        let self = this
+        return self.word.subsetRelSetR.filter(r => r.src === self.word.text)
       },
-      drels_inst: function () {
-        return this.word.dualRels.filter(r => r.attr === 'INST')
+      supersetRS0: function () {
+        let self = this
+        return self.word.supersetRelSetR.filter(r => r.dst === self.word.text)
       },
-      drels_gech: function () {
-        return this.word.dualRels.filter(r => r.attr === 'GECH')
+      instanceRS0: function () {
+        let self = this
+        return self.word.instanceRelSetR.filter(r => r.src === self.word.text)
       },
-      grels_attr1: function () {
-        return this.word.ge1Rels.filter(r => r.key === this.me)
+      definitionRS0: function () {
+        let self = this
+        return self.word.definitionRelSetR.filter(r => r.dst === self.word.text)
       },
-      grels_attr2: function () {
-        return this.word.ge2Rels.filter(r => r.key === this.me)
+      subtopicRS0: function () {
+        let self = this
+        return self.word.subtopicRelSetR.filter(r => r.src === self.word.text)
       },
-      grels_refer: function () {
-        return this.word.ge1Rels.filter(r => r.val === this.me)
+      supertopicRS0: function () {
+        let self = this
+        return self.word.supertopicRelSetR.filter(r => r.dst === self.word.text)
       },
 
-      /* rs0: arr of rels shallow
-                ns0: arr of nodes shallow; nsr: arr of nodes recursive */
-      // --------- subsets & supersets ---------
-      rs0_subsets: function () {
-        return this.drels_subs.filter(e => e.key === this.me)
+      // --------- NSR ---------
+      subsetNSR: function () {
+        return fetchNSR(this.word.text, this.word.subsetRelSetR, true)
       },
-      nsr_subsets: function () {
-        return DAGVisitor.newTraversal(this.drels_subs, e => e.key, e => e.val, this.me)
-          .filter(n => n !== this.me)
+      supersetNSR: function () {
+        return fetchNSR(this.word.text, this.word.supersetRelSetR, false)
       },
-      rs0_supersets: function () {
-        return this.drels_subs.filter(e => e.val === this.me)
+      instanceNSR: function () {
+        return fetchNSR(this.word.text, this.word.instanceRelSetR, true)
       },
-      nsr_supersets: function () {
-        return DAGVisitor.newTraversal(this.drels_subs, e => e.val, e => e.key, this.me)
-          .filter(n => n !== this.me)
+      definitionNSR: function () {
+        return fetchNSR(this.word.text, this.word.definitionRelSetR, false)
       },
-      // -------- subtopics & supertopics ---------
-      rs0_subtopics: function () {
-        return this.drels_gech.filter(e => e.key === this.me)
+      subtopicNSR: function () {
+        return fetchNSR(this.word.text, this.word.subtopicRelSetR, true)
       },
-      ns0_subtopics: function () {
-        return this.drels_gech.filter(e => e.key === this.me).map(e => e.val)
-      },
-      nsr_subtopics: function () {
-        return DAGVisitor.newTraversal(this.drels_gech, e => e.key, e => e.val, this.me)
-          .filter(n => n !== this.me)
-      },
-      rs0_supertopics: function () {
-        return this.drels_gech.filter(e => e.val === this.me)
-      },
-      ns0_supertopics: function () {
-        return this.drels_gech.filter(e => e.val === this.me).map(e => e.key)
-      },
-      nsr_supertopics: function () {
-        return DAGVisitor.newTraversal(this.drels_gech, e => e.val, e => e.key, this.me)
-          .filter(n => n !== this.me)
+      supertopicNSR: function () {
+        return fetchNSR(this.word.text, this.word.supersetRelSetR, false)
       },
 
       // -------- definitions & instances ---------
       rs0_definitions: function () {
-        return this.drels_inst.filter(e => e.val === this.me)
+        return this.dualRels_inst.filter(e => e.val === this.me)
       },
       ns0_definitions: function () {
-        return this.drels_inst.filter(e => e.val === this.me).map(e => e.key)
+        return this.dualRels_inst.filter(e => e.val === this.me).map(e => e.key)
       },
       nsr_definitions: function () {
         let arrs = this.ns0_definitions.map(def0 =>
-          DAGVisitor.newTraversal(this.drels_subs, e => e.val, e => e.key, def0))
+          DAGVisitor.newTraversal(this.dualRels_subs, e => e.val, e => e.key, def0))
         return arrs.reduce((S, A) => _.union(S, A), [])   // lodash's array union
       },
       rs0_instances: function () {
-        return this.drels_inst.filter(e => e.key === this.me)
+        return this.dualRels_inst.filter(e => e.key === this.me)
       },
       ns0_instances: function () {
-        return this.drels_inst.filter(e => e.key === this.me).map(e => e.val)
+        return this.dualRels_inst.filter(e => e.key === this.me).map(e => e.val)
       },
       nsr_instances: function () {
         let subsets = _.union(Array.from(this.nsr_subsets), [this.me])
         let arrs = subsets.map(subdef =>
-          this.drels_inst.filter(e => e.key === subdef).map(e => e.val))
+          this.dualRels_inst.filter(e => e.key === subdef).map(e => e.val))
         return arrs.reduce((S, A) => _.union(S, A), [])
       },
 
       ns0_attr1: function () {
-        return this.grels_attr1.filter(e => e.key === this.me).map(e => e.val)
+        return this.ge1Rels_attr.filter(e => e.key === this.me).map(e => e.val)
       },
 
       /* rmg: rel map grouped */
       rmg_attr1: function () {
         return Objects.sortObject(_.mapValues(
-          _.groupBy(this.grels_attr1, this.rel_attr_mapper),
+          _.groupBy(this.ge1Rels_attr, this.rel_attr_mapper),
           rels => _.sortBy(rels, ['attr', 'attrx', 'vno'])
         ))
       },
       rmg_attr2: function () {
         return Objects.sortObject(_.mapValues(
-          _.groupBy(this.grels_attr2, this.rel_attr_mapper),
+          _.groupBy(this.ge2Rels_attr, this.rel_attr_mapper),
           rels => _.sortBy(rels, ['attr', 'attrx', 'vno'])
         ))
       },
@@ -303,7 +308,7 @@
       ns0_attributes2: function () {
         return this.word.ge2Rels.filter(e => e.key === this.me).map(e => e.val)
       },
-      ns0releferences: function () {
+      ns0_references: function () {
         return this.word.ge1Rels.filter(e => e.val === this.me).map(e => e.key)
       }
     },
@@ -314,22 +319,30 @@
       this.loadItem()
     },
     methods: {
+      // ------------ aliasRels ---------------
       /**
        * add alias rel
        */
-      add$ar () {
+      addAR () {
         const self = this
         let v = self.editor.newAliasText
         if (!v) return
         let rel = {key: this.word.text, val: v}
         DictApi.aliasRels.httpPost(rel, self.notifyOkay('添加别名'), self.notifyFail('添加别名'))
       },
+      /**
+       * del alias rel
+       */
+      delAR (rel) {
+        const self = this
+        DictApi.aliasRels.httpDelete(rel, self.notifyOkay('移除关联'), self.notifyFail('移除关联'))
+      },
       // ------------ dualRels ---------------
       /**
        * add dual rel
        * @param evt
        */
-      add$dr (evt) {
+      addDR (evt) {
         const self = this
         let _vv = evt.target.value
         if (!_vv) return
@@ -364,7 +377,7 @@
        * del dualRel
        * @param rel
        */
-      del$dr (rel) {
+      delDR (rel) {
         const self = this
         DictApi.dualRels.httpDelete(rel, self.notifyOkay('移除关联'), self.notifyFail('移除关联'))
       },
@@ -375,7 +388,7 @@
        * @param relsOld
        * @param evt
        */
-      add$gr1v (relsOld, evt) {
+      addG1Rv (relsOld, evt) {
         const self = this
         let valNew = evt.target.value.trim()
         if (valNew === '') return
@@ -394,14 +407,14 @@
        * del ge1Rel val
        * @param rel
        */
-      del$gr1v (rel) {
+      delG1Rv (rel) {
         const self = this
         DictApi.ge1Rels.httpDelete(rel, self.notifyOkay('移除属性值'), self.notifyFail('移除属性值'))
       },
       /**
        *  add ge1Rel
        */
-      add$gr1 () {
+      addG1R () {
         const self = this
         let rel = this.editor.adder.ge1Rel
         rel.key = self.word.text
@@ -413,7 +426,7 @@
        * del ge1Rel vals by attr
        * @param attr
        */
-      del$gr1 (attr) {
+      delG1R (attr) {
         const self = this
         let rel = {key: self.word.text, attr: attr}
         DictApi.ge1Rels.httpDelete(rel, self.notifyOkay('移除属性'), self.notifyFail('移除属性'))
@@ -424,7 +437,7 @@
        * @param relsOld
        * @param evt
        */
-      add$gr2v (relsOld, evt) {
+      addG2Rv (relsOld, evt) {
         const self = this
         let valNew = evt.target.value.trim()
         if (valNew === '') return
@@ -449,16 +462,15 @@
       },
       /**
        * del ge2Rel val
-       * @param rel
        */
-      del$gr2v (rel) {
+      delG2Rv (rel) {
         const self = this
         DictApi.ge2Rels.httpDelete(rel, self.notifyOkay('移除属性II值'), self.notifyFail('移除属性II值'))
       },
       /**
        * add ge2Rel
        */
-      add$gr2 () {
+      addG2R () {
         const self = this
         let rel = this.editor.adder.ge2Rel
         rel.key = self.word.text
@@ -476,7 +488,7 @@
        * del ge2Rel vals by attr
        * @param attr
        */
-      del$gr2 (attr) {
+      delG2R (attr) {
         const self = this
         let rel = {key: self.word.text, attr: attr}
         DictApi.ge2Rels.httpDelete(rel, self.notifyOkay('移除属性II'), self.notifyFail('移除属性II'))
@@ -488,8 +500,8 @@
        * @param word
        * @return {*}
        */
-      url$w (word) {
-        return 1
+      url$w (w) {
+        return `../${w}/edit`
       },
 
       loadItem () {
@@ -509,6 +521,7 @@
         return d => {
           let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + what : '')
           self.$notify.success({title: what + '成功', message: msg})
+          self.loadItem()
         }
       },
       notifyFail (what) {
@@ -552,8 +565,8 @@
     background: yellow;
   }
 
-  .Tag {
-    margin: 3px;
+  .adder {
+    width: 10em;
   }
 
   .attrName {

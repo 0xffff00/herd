@@ -4,11 +4,9 @@ import appConf from '../../config/app-conf'
 const CTX = appConf.apis.dict.url
 
 const words = new RestApi(CTX + '/words/', '{text}')
-const aliasRels = new RestApi(CTX + '/alias-rels/', 'key={key};attr={attr};vno={vno}')
-const dualRels = new RestApi(CTX + '/dual-rels/', 'key={key};attr={attr};vno={vno}')
-const ge1Rels = new RestApi(CTX + '/ge1-rels/', 'key={key};attr={attr};vno={vno}')
-const ge2Rels = new RestApi(CTX + '/ge2-rels/', 'key={key};attr={attr};vno={vno}')
+const basicRelations = new RestApi(CTX + '/relations/basic/', 'src={src};attr={attr};no={no}')
+const x1Relations = new RestApi(CTX + '/relations/x1/', 'src={src};attr={attr};no={no}')
 export default {
-  words, aliasRels, dualRels, ge1Rels, ge2Rels
+  words, basicRelations, x1Relations
 }
 
