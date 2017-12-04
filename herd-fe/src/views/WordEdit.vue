@@ -3,7 +3,7 @@
     <h1>{{word.text}} - 详情</h1>
     <h2>别名</h2>
     <div id="alias-rels">
-      <Tag v-for="r in word.aliasRels" :closable="true" @on-close="delAR(r)">
+      <Tag v-for="r in aliasRS0" :key="rel2id(r)" :closable="true" @on-close="delAR(r)">
         <a :href="url$w(r.val)">{{r.val}}</a>
       </Tag>
       <Input class="adder" size="small" placeholder="添加新别名" v-model="editor.newAliasText" @on-enter="addAR"/>
@@ -11,146 +11,146 @@
     <h2>定义与实例</h2>
     <div id="dual-rels-inst">
       <h3>直接类型</h3>
-      <Tag v-for="r in rs0_definitions" :closable="true" @on-close="delDR(r)">
+      <Tag v-for="r in definitionRS0" :key="rel2id(r)" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.key)">{{r.key}}</a>
       </Tag>
       <Input name="definition" class="adder" size="small" placeholder="关联新类型" @on-enter="addDR"/>
       <h3>所有超类</h3>
-      <Tag v-for="w in nsr_definitions"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in definitionESA" :key="w"><a :href="url$w(w)">{{w}}</a></Tag>
 
       <h3>直接实例</h3>
-      <Tag v-for="r in rs0_instances" :closable="true" @on-close="delDR(r)">
+      <Tag v-for="r in instanceRS0" :key="rel2id(r)" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.val)">{{r.val}}</a>
       </Tag>
       <Input name="instance" class="adder" size="small" placeholder="关联新实例" @on-enter="addDR"/>
       <h3>所有实例</h3>
-      <Tag v-for="w in nsr_instances"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in instanceESA" :key="w"><a :href="url$w(w)">{{w}}</a></Tag>
     </div>
 
     <h2>集合</h2>
     <div id="dual-rels-subs">
       <h3>直接子集</h3>
-      <Tag v-for="r in rs0_subsets" :closable="true" @on-close="delDR(r)">
+      <Tag v-for="r in subsetRS0" :key="rel2id(r)" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.val)">{{r.val}}</a>
       </Tag>
       <Input name="subset" class="adder" size="small" placeholder="关联新子集" @on-enter="addDR"/>
 
       <h3>所有子集</h3>
-      <Tag v-for="w in nsr_subsets"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in subsetESR" :key="w"><a :href="url$w(w)">{{w}}</a></Tag>
       <h3>直接超集</h3>
-      <Tag v-for="r in rs0_supersets" :closable="true" @on-close="delDR(r)">
+      <Tag v-for="r in supersetRS0" :key="rel2id(r)" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.key)">{{r.key}}</a>
       </Tag>
       <Input name="superset" class="adder" size="small" placeholder="关联新超集" @on-enter="addDR"/>
       <h3>所有超集</h3>
-      <Tag v-for="w in nsr_supersets"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in supersetESR" :key="w"><a :href="url$w(w)">{{w}}</a></Tag>
     </div>
 
     <h2>相关话题</h2>
     <div id="dual-rels-gech">
       <h3>直接子话题</h3>
-      <Tag v-for="r in rs0_subtopics" :closable="true" @on-close="delDR(r)">
+      <Tag v-for="r in subtopicRS0" :key="rel2id(r)" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.val)">{{r.val}}</a>
       </Tag>
       <Input name="subtopic" class="adder" size="small" placeholder="关联新子话题" @on-enter="addDR"/>
       <h3>所有子话题</h3>
-      <Tag v-for="w in nsr_subtopics"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in subtopicESR" :key="w"><a :href="url$w(w)">{{w}}</a></Tag>
       <h3>直接父话题</h3>
-      <Tag v-for="r in rs0_supertopics" :closable="true" @on-close="delDR(r)">
+      <Tag v-for="r in supertopicRS0" :key="rel2id(r)" :closable="true" @on-close="delDR(r)">
         <a :href="url$w(r.key)">{{r.key}}</a></Tag>
       <Input name="supertopic" class="adder" size="small" placeholder="关联新父话题"
              @on-enter="addDR"/>
       <h3>所有父话题</h3>
-      <Tag v-for="w in nsr_supertopics"><a :href="url$w(w)">{{w}}</a></Tag>
+      <Tag v-for="w in supertopicESR" :key="w"><a :href="url$w(w)">{{w}}</a></Tag>
     </div>
 
 
-    <h2>属性和应用</h2>
-    <div id="generic-rels">
-      <h3>属性</h3>
-      <ul>
-        <li v-for="(rels,attr) in rmg_attr1">
-          <el-button type="danger" size="small" @click="delG1R(attr)"><i class="fa fa-times"></i></el-button>
-          <span class="attrName">{{attr}}</span> {{translate_pred(rels[0].pred)}}
-          <Tag v-for="r in rels" :closable="true" @on-close="delG1Rv(r)">
-            <a :href="url$w(r.val)">{{r.val}}</a>
-          </Tag>
-          <Input class="adder" size="small" placeholder="关联新属性值" @on-enter="addG1Rv(rels,$event)"/>
+    <!--  <h2>属性和应用</h2>
+      <div id="generic-rels">
+        <h3>属性</h3>
+        <ul>
+          <li v-for="(rels,attr) in attributeRMG">
+            <el-button type="danger" size="small" @click="delG1R(attr)"><i class="fa fa-times"></i></el-button>
+            <span class="attrName">{{attr}}</span> {{translate_pred(rels[0].pred)}}
+            <Tag v-for="r in rels" :closable="true" @on-close="delG1Rv(r)">
+              <a :href="url$w(r.val)">{{r.val}}</a>
+            </Tag>
+            <Input class="adder" size="small" placeholder="关联新属性值" @on-enter="addG1Rv(rels,$event)"/>
 
-        </li>
-        <li>
-          <el-form :inline="true" :model="editor.adder.ge1Rel">
-            <el-form-item>
-              <Input v-model="editor.adder.ge1Rel.attr" placeholder="属性名" size="small"
-                     style="width:140px;"></Input>
-            </el-form-item>
-            <el-form-item>
-              <el-select v-model="editor.adder.ge1Rel.pred" placeholder="谓词" size="small" style="width:80px;">
-                <el-option label="是" value="IS"></el-option>
-                <el-option label="有" value="HAS"></el-option>
-                <el-option label="仅有" value="ARE"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <Input v-model="editor.adder.ge1Rel.vals" placeholder="属性值，若填多个以空格隔开" size="small"
-                     @on-enter="addG1R" style="width:280px;"></Input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="success" size="small" @click="addG1R"><i class="fa fa-plus"></i></el-button>
-            </el-form-item>
-          </el-form>
-        </li>
-      </ul>
-      <h3>属性（值）</h3>
-      <ul>
-        <li v-for="(rels,attr) in rmg_attr2">
-          <el-button type="danger" size="small" @click="delG2R(attr)"><i class="fa fa-times"></i></el-button>
-          <span class="attrName">{{attr}}</span> {{translate_pred(rels[0].pred)}}
-          <Tag v-for="r in rels" :closable="true" @on-close="delG2Rv(r)">
-            <span class="valnum">{{r.valnum}}</span><span class="valstr">{{r.valstr}}</span> {{r.valmu}}
-          </Tag>
-          <Input class="adder" size="small" placeholder="关联新属性值"
-                 @on-enter="addG2Rv(rels,$event)"></Input>
+          </li>
+          <li>
+            <el-form :inline="true" :model="editor.adder.ge1Rel">
+              <el-form-item>
+                <Input v-model="editor.adder.ge1Rel.attr" placeholder="属性名" size="small"
+                       style="width:140px;"></Input>
+              </el-form-item>
+              <el-form-item>
+                <el-select v-model="editor.adder.ge1Rel.pred" placeholder="谓词" size="small" style="width:80px;">
+                  <el-option label="是" value="IS"></el-option>
+                  <el-option label="有" value="HAS"></el-option>
+                  <el-option label="仅有" value="ARE"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <Input v-model="editor.adder.ge1Rel.vals" placeholder="属性值，若填多个以空格隔开" size="small"
+                       @on-enter="addG1R" style="width:280px;"></Input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="success" size="small" @click="addG1R"><i class="fa fa-plus"></i></el-button>
+              </el-form-item>
+            </el-form>
+          </li>
+        </ul>
+        <h3>属性（值）</h3>
+        <ul>
+          <li v-for="(rels,attr) in rmg_attr2">
+            <el-button type="danger" size="small" @click="delG2R(attr)"><i class="fa fa-times"></i></el-button>
+            <span class="attrName">{{attr}}</span> {{translate_pred(rels[0].pred)}}
+            <Tag v-for="r in rels" :closable="true" @on-close="delG2Rv(r)">
+              <span class="valnum">{{r.valnum}}</span><span class="valstr">{{r.valstr}}</span> {{r.valmu}}
+            </Tag>
+            <Input class="adder" size="small" placeholder="关联新属性值"
+                   @on-enter="addG2Rv(rels,$event)"></Input>
 
-        </li>
-        <li>
-          <el-form :inline="true" :model="editor.adder.ge2Rel">
-            <el-form-item>
-              <Input v-model="editor.adder.ge2Rel.attr" placeholder="属性名" size="small"
-                     style="width:140px;"></Input>
-            </el-form-item>
-            <el-form-item>
-              <el-select v-model="editor.adder.ge2Rel.pred" placeholder="谓词" size="small" style="width:60px;">
-                <el-option label="是" value="IS"></el-option>
-                <el-option label="有" value="HAS"></el-option>
-                <el-option label="仅有" value="ARE"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <Input v-model="editor.adder.ge2Rel.vals" placeholder="属性值" size="small"
-                     @on-enter="addG2R" style="width:230px;"></Input>
-            </el-form-item>
-            <el-form-item>
-              <Input v-model="editor.adder.ge2Rel.valmu" placeholder="量词" size="small"
-                     @on-enter="addG2R" style="width:60px;"></Input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="success" size="small" @click="addG2R"><i class="fa fa-plus"></i></el-button>
-            </el-form-item>
-          </el-form>
-        </li>
+          </li>
+          <li>
+            <el-form :inline="true" :model="editor.adder.ge2Rel">
+              <el-form-item>
+                <Input v-model="editor.adder.ge2Rel.attr" placeholder="属性名" size="small"
+                       style="width:140px;"></Input>
+              </el-form-item>
+              <el-form-item>
+                <el-select v-model="editor.adder.ge2Rel.pred" placeholder="谓词" size="small" style="width:60px;">
+                  <el-option label="是" value="IS"></el-option>
+                  <el-option label="有" value="HAS"></el-option>
+                  <el-option label="仅有" value="ARE"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <Input v-model="editor.adder.ge2Rel.vals" placeholder="属性值" size="small"
+                       @on-enter="addG2R" style="width:230px;"></Input>
+              </el-form-item>
+              <el-form-item>
+                <Input v-model="editor.adder.ge2Rel.valmu" placeholder="量词" size="small"
+                       @on-enter="addG2R" style="width:60px;"></Input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="success" size="small" @click="addG2R"><i class="fa fa-plus"></i></el-button>
+              </el-form-item>
+            </el-form>
+          </li>
 
-      </ul>
+        </ul>
 
 
-      <h3>引用</h3>
-      <ul>
-        <li v-for="rel in ge1Rels_refer">
-          <a :href="url$w(rel.key)">{{rel.key}}</a> 的 {{rel.attr}} {{translate_pred(rel.pred)
-          }} {{rel.val}}
-        </li>
-      </ul>
-    </div>
+        <h3>引用</h3>
+        <ul>
+          <li v-for="rel in ge1Rels_refer">
+            <a :href="url$w(rel.key)">{{rel.key}}</a> 的 {{rel.attr}} {{translate_pred(rel.pred)
+            }} {{rel.val}}
+          </li>
+        </ul>
+      </div>-->
 
   </div>
 
@@ -167,16 +167,44 @@
    * ES0, EntSet0: Entity Set shallow
    * ESR, EntSetR: Entity Set recursive
    * RS0, RelSet0: Relation Set shallow
-   * RSR, RelSetR: Relation Set recursive
+   * RSR, RSR: Relation Set recursive
    * RMG: rel map grouped
    */
 
-  function fetchNSR (me, edges, forward) {
+  /**
+   * RSR -> ESR
+   * @param me
+   * @param edges RSR
+   * @param forward
+   * @returns {Set}
+   */
+  function fetchESR (me, edges, forward) {
     let visitor = forward ? new DAGVisitor(me, edges, e => e.src, e => e.dst) : new DAGVisitor(me, edges, e => e.dst, e => e.src)
     visitor.visitFrom(me)
     let res = new Set(visitor.getVerticesVisited())
     res.delete(me)
     return res
+  }
+
+  // utils
+  const rel2id = rel => rel.src + '-' + rel.attr + '-' + rel.no
+  const rel2attr = rel => rel.attr + (rel.attrx ? '(' + rel.attrx + ')' : '')
+
+  const rel2str = (rel) => {
+    if (!rel) return ''
+    return rel.key + '[' + rel.attr + '] -->' + rel.val
+  }
+
+  function pred2str (pred) {
+    switch (pred) {
+      case 'IS':
+        return '是'
+      case 'ARE':
+        return '仅有'
+      case 'HAS':
+        return '有'
+    }
+    return '='
   }
 
   export default {
@@ -188,15 +216,17 @@
           desc: null,
           state: null,
           updateTime: null,
-          aliasRelSet0: [],
-          subsetRelSetR: [],
-          supersetRelSetR: [],
-          instanceRelSetR: [],
-          definitionRelSetR: [],
-          subtopicRelSetR: [],
-          supertopicRelSetR: [],
-          attributeRelSet0: [],
-          referenceRelSet0: []
+          aliasRS0: [],
+          subsetRSR: [],
+          supersetRSR: [],
+          instanceRS0: [],
+          instanceESA: [],
+          definitionRS0: [],
+          definitionESA: [],
+          subtopicRSR: [],
+          supertopicRSR: [],
+          attributeRS0: [],
+          referenceRS0: []
         },
         editor: {
           newAliasText: '',
@@ -216,102 +246,59 @@
         return this.word.text
       },
 
-      // --------- RS0 ---------
+      // --------- 6 RS0 ---------
       subsetRS0: function () {
         let self = this
-        return self.word.subsetRelSetR.filter(r => r.src === self.word.text)
+        return self.word.subsetRS.filter(r => r.src === self.word.text)
       },
       supersetRS0: function () {
         let self = this
-        return self.word.supersetRelSetR.filter(r => r.dst === self.word.text)
+        return self.word.supersetRSR.filter(r => r.dst === self.word.text)
       },
       instanceRS0: function () {
-        let self = this
-        return self.word.instanceRelSetR.filter(r => r.src === self.word.text)
+        return this.word.instanceRS0
       },
       definitionRS0: function () {
-        let self = this
-        return self.word.definitionRelSetR.filter(r => r.dst === self.word.text)
+        return this.word.definitionRS0
       },
       subtopicRS0: function () {
         let self = this
-        return self.word.subtopicRelSetR.filter(r => r.src === self.word.text)
+        return self.word.subtopicRSR.filter(r => r.src === self.word.text)
       },
       supertopicRS0: function () {
         let self = this
-        return self.word.supertopicRelSetR.filter(r => r.dst === self.word.text)
+        return self.word.supertopicRSR.filter(r => r.dst === self.word.text)
       },
 
-      // --------- NSR ---------
-      subsetNSR: function () {
-        return fetchNSR(this.word.text, this.word.subsetRelSetR, true)
+      // --------- 6 NSR ---------
+      subsetESR: function () {
+        return fetchESR(this.word.text, this.word.subsetRSR, true)
       },
-      supersetNSR: function () {
-        return fetchNSR(this.word.text, this.word.supersetRelSetR, false)
+      supersetESR: function () {
+        return fetchESR(this.word.text, this.word.supersetRSR, false)
       },
-      instanceNSR: function () {
-        return fetchNSR(this.word.text, this.word.instanceRelSetR, true)
+      instanceESA: function () {
+        return this.word.instanceESA
       },
-      definitionNSR: function () {
-        return fetchNSR(this.word.text, this.word.definitionRelSetR, false)
+      definitionESA: function () {
+        return this.word.definitionESA
       },
-      subtopicNSR: function () {
-        return fetchNSR(this.word.text, this.word.subtopicRelSetR, true)
+      subtopicESR: function () {
+        return fetchESR(this.word.text, this.word.subtopicRSR, true)
       },
-      supertopicNSR: function () {
-        return fetchNSR(this.word.text, this.word.supersetRelSetR, false)
-      },
-
-      // -------- definitions & instances ---------
-      rs0_definitions: function () {
-        return this.dualRels_inst.filter(e => e.val === this.me)
-      },
-      ns0_definitions: function () {
-        return this.dualRels_inst.filter(e => e.val === this.me).map(e => e.key)
-      },
-      nsr_definitions: function () {
-        let arrs = this.ns0_definitions.map(def0 =>
-          DAGVisitor.newTraversal(this.dualRels_subs, e => e.val, e => e.key, def0))
-        return arrs.reduce((S, A) => _.union(S, A), [])   // lodash's array union
-      },
-      rs0_instances: function () {
-        return this.dualRels_inst.filter(e => e.key === this.me)
-      },
-      ns0_instances: function () {
-        return this.dualRels_inst.filter(e => e.key === this.me).map(e => e.val)
-      },
-      nsr_instances: function () {
-        let subsets = _.union(Array.from(this.nsr_subsets), [this.me])
-        let arrs = subsets.map(subdef =>
-          this.dualRels_inst.filter(e => e.key === subdef).map(e => e.val))
-        return arrs.reduce((S, A) => _.union(S, A), [])
+      supertopicESR: function () {
+        return fetchESR(this.word.text, this.word.supersetRSR, false)
       },
 
-      ns0_attr1: function () {
-        return this.ge1Rels_attr.filter(e => e.key === this.me).map(e => e.val)
-      },
-
-      /* rmg: rel map grouped */
-      rmg_attr1: function () {
+      attributeRMG: function () {
         return Objects.sortObject(_.mapValues(
-          _.groupBy(this.ge1Rels_attr, this.rel_attr_mapper),
-          rels => _.sortBy(rels, ['attr', 'attrx', 'vno'])
+          _.groupBy(this.word.attributeES0, rel2attr),
+          rels => _.sortBy(rels, ['attr', 'attrx', 'no'])
         ))
-      },
-      rmg_attr2: function () {
-        return Objects.sortObject(_.mapValues(
-          _.groupBy(this.ge2Rels_attr, this.rel_attr_mapper),
-          rels => _.sortBy(rels, ['attr', 'attrx', 'vno'])
-        ))
-      },
-
-      ns0_attributes2: function () {
-        return this.word.ge2Rels.filter(e => e.key === this.me).map(e => e.val)
-      },
-      ns0_references: function () {
-        return this.word.ge1Rels.filter(e => e.val === this.me).map(e => e.key)
       }
+
     },
+
     created () {
       let params = this.$route.params
       this.word.text = params.text
@@ -327,7 +314,9 @@
         const self = this
         let v = self.editor.newAliasText
         if (!v) return
-        let rel = {key: this.word.text, val: v}
+        let rel = {
+          src: this.word.text, attr: '', dst: v
+        }
         DictApi.aliasRels.httpPost(rel, self.notifyOkay('添加别名'), self.notifyFail('添加别名'))
       },
       /**
@@ -529,26 +518,6 @@
         return d => {
           self.$notify.error({title: what + '失败', message: d.message, duration: 0})
         }
-      },
-
-      // -------- utils --------
-      rel_attr_mapper (rel1) {
-        return rel1.attr + (rel1.attrx ? '(' + rel1.attrx + ')' : '')
-      },
-      rel_to_str (rel) {
-        if (!rel) return ''
-        return rel.key + '[' + rel.attr + '] -->' + rel.val
-      },
-      translate_pred (pred) {
-        switch (pred) {
-          case 'IS':
-            return '是'
-          case 'ARE':
-            return '仅有'
-          case 'HAS':
-            return '有'
-        }
-        return '='
       }
 
     }

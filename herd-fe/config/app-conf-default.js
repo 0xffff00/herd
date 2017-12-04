@@ -1,6 +1,6 @@
 /**
  * designed by HZK
- * 实在不会该webpack-merge,一用就报错Unexpected token :
+ * 实在不会改vue-cli自动生成的webpack-merge相关js,一用就报错Unexpected token :
  */
 module.exports = {
   port: 8981,
