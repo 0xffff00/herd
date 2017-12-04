@@ -11,5 +11,4 @@ const describeFileSize = function (byteLength) {
   if (KB > 1) return KB.toPrecision(3) + 'KB'
   return byteLength + 'KB'
 }
-
 export default {describeFileSize, describeImageSize}
