@@ -1,8 +1,5 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 let path = require('path')
-let appConf = require('./app-conf')
-console.log('--------- command line args: (top priority) ---------')
-console.log('appConf = ' + JSON.stringify(appConf))
 
 module.exports = {
   build: {
@@ -26,7 +23,7 @@ module.exports = {
   },
   dev: {
     env: require('./dev.env'),
-    port: appConf.port,
+    port: -1,
     autoOpenBrowser: true,
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',

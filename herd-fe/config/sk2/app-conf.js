@@ -1,15 +1,15 @@
 const conf0 = require('./app-conf-default')
 const _ = require('lodash')
-
+const fucker = require('./cli-arg-fucker')
 // conf0= _.cloneDeep(conf0)
 let conf1 = {
-  port: process.env.npm_config_port,
+  port: process.env.port,
   apis: {
     herd: {
-      url: process.env.npm_config_herdApiUrl
+      url: fucker.unwrapArg(process.env.herdApiUrl)
     },
     dict: {
-      url: process.env.npm_config_dictApiUrl
+      url: fucker.unwrapArg(process.env.dictApiUrl)
     }
   }
 }

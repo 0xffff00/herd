@@ -1,5 +1,5 @@
 import RestApi from '../utils/RestApi'
-import appConf from '../../config/app-conf'
+import appConf from '../../config/sk2/app-conf'
 
 const CTX = appConf.apis.dict.url
 

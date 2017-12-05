@@ -12,7 +12,8 @@
     "build": "node build/build.js",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "test": "npm run unit",
-    "lint": "eslint --ext .js,.vue src test/unit/specs"
+    "lint": "eslint --ext .js,.vue src test/unit/specs",
+    "learn3": "node src/learn/learn-pass-cli-arg.js"
   },
   "dependencies": {
     "font-awesome": "^4.7.0",
@@ -92,7 +93,8 @@
     "webpack-dev-middleware": "^1.10.0",
     "webpack-dev-server": "^2.7.1",
     "webpack-hot-middleware": "^2.18.0",
-    "webpack-merge": "^4.1.0"
+    "webpack-merge": "^4.1.0",
+    "yargs": "^10.0.3"
   },
   "engines": {
     "node": ">= 4.0.0",

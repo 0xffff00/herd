@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import Urls from '../utils/Urls'
 import RestApi from '../utils/RestApi'
-import appConf from '../../config/app-conf'
+import appConf from '../../config/sk2/app-conf'
 
 const CTX = appConf.apis.herd.url
 
