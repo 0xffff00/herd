@@ -6,7 +6,7 @@ import Album2 from '@/views/Album2'
 import RepoMan from '@/views/RepoMan'
 import WordMan from '@/views/WordMan'
 import WordEdit from '@/views/WordEdit'
-
+import WordView from '@/views/WordView'
 Vue.use(VueRouter)
 Vue.use(iView)
 const router = new VueRouter({
@@ -36,6 +36,11 @@ const router = new VueRouter({
       path: '/words/:text/edit',
       name: 'WordEdit',
       component: WordEdit
+    },
+    {
+      path: '/words/:text/view',
+      name: 'WordView',
+      component: WordView
     }
   ]
 })

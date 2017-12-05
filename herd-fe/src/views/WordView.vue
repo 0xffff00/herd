@@ -1,73 +1,38 @@
 <template>
-  <div id="word-manager">
-    <h1>{{word.text}} - 详情 - 编辑</h1>
-    <ButtonGroup shape="circle">
-      <Button type="ghost" icon="ios-plus-empty" @click="">保存</Button>
-      <Button type="error" icon="trash-a" disabled>删除</Button>
-    </ButtonGroup>
+  <div id="word-viewer">
+    <h1>{{word.text}} - 详情</h1>
     <h2>描述</h2>
     <div>
-      <Input v-model="word.desc" type="textarea" :rows="4" placeholder="描述"/>
+      {{word.desc}}
     </div>
     <h2>别名({{word.aliasRS0.length}})</h2>
     <div id="alias">
-      <Tag closable v-for="r in word.aliasRS0" :key="r.no" @on-close="delBR(r,'别名')">
+      <Tag v-for="r in word.aliasRS0" :key="r.no" @on-close="delBR(r,'别名')">
         <a :href="link(r.dst)">{{r.dst}}</a>
       </Tag>
-      <Input name="ALIA-f" class="adder" size="small" placeholder="添加新别名" @on-enter="addBR"/>
     </div>
+
     <h2>定义与实例</h2>
     <div id="def-and-inst">
-      <h3>直接类型({{definitionRS0.length}})</h3>
-      <Tag closable v-for="r in definitionRS0" :key="r.no" @on-close="delBR(r,'类型')">
-        <a :href="link(r.src)">{{r.src}}</a>
-      </Tag>
-      <Input name="INST-b" class="adder" size="small" placeholder="关联新类型" @on-enter="addBR"/>
       <h3>所有超类({{definitionESA.length}})</h3>
       <Tag v-for="e in definitionESA" :key="e"><a :href="link(e)">{{e}}</a></Tag>
 
-
-      <h3>直接实例({{instanceRS0.length}})</h3>
-      <Tag closable v-for="r in instanceRS0" :key="r.no" @on-close="delBR(r,'实例')">
-        <a :href="link(r.dst)">{{r.dst}}</a>
-      </Tag>
-      <Input name="INST-f" class="adder" size="small" placeholder="关联新实例" @on-enter="addBR"/>
       <h3>所有实例({{instanceESA.length}})</h3>
       <Tag v-for="e in instanceESA" :key="e"><a :href="link(e)">{{e}}</a></Tag>
     </div>
 
     <h2>集合</h2>
     <div id="subset-and-superset">
-      <h3>直接子集({{subsetRS0.length}})</h3>
-      <Tag closable v-for="r in subsetRS0" :key="r.no" @on-close="delBR(r,'子集')">
-        <a :href="link(r.dst)">{{r.dst}}</a>
-      </Tag>
-      <Input name="SUBS-f" class="adder" size="small" placeholder="关联新子集" @on-enter="addBR"/>
-
       <h3>所有子集({{subsetESR.length}})</h3>
       <Tag v-for="e in subsetESR" :key="e"><a :href="link(e)">{{e}}</a></Tag>
-      <h3>直接超集({{supersetRS0.length}})</h3>
-      <Tag closable v-for="r in supersetRS0" :key="r.no" @on-close="delBR(r,'超集')">
-        <a :href="link(r.src)">{{r.src}}</a>
-      </Tag>
-      <Input name="SUBS-b" class="adder" size="small" placeholder="关联新超集" @on-enter="addBR"/>
       <h3>所有超集({{supersetESR.length}})</h3>
       <Tag v-for="e in supersetESR" :key="e"><a :href="link(e)">{{e}}</a></Tag>
     </div>
 
     <h2>相关话题</h2>
     <div id="subtopic-and-supertopic">
-      <h3>直接子话题</h3>
-      <Tag closable v-for="r in subtopicRS0" :key="r.no" @on-close="delBR(r,'子话题')">
-        <a :href="link(r.dst)">{{r.dst}}</a>
-      </Tag>
-      <Input name="SUBT-f" class="adder" size="small" placeholder="关联新子话题" @on-enter="addBR"/>
       <h3>所有子话题</h3>
       <Tag v-for="e in subtopicESR" :key="e"><a :href="link(e)">{{e}}</a></Tag>
-      <h3>直接父话题</h3>
-      <Tag closable v-for="r in supertopicRS0" :key="r.no" @on-close="delBR(r,'父话题')">
-        <a :href="link(r.src)">{{r.src}}</a></Tag>
-      <Input name="SUBT-b" class="adder" size="small" placeholder="关联新父话题" @on-enter="addBR"/>
       <h3>所有父话题</h3>
       <Tag v-for="e in supertopicESR" :key="e"><a :href="link(e)">{{e}}</a></Tag>
     </div>
@@ -77,32 +42,12 @@
       <h3>属性</h3>
       <ul>
         <li v-for="(rels,attrVO) in attributeRMG">
-          <Button shape="circle" type="ghost" icon="close" class="btn-del" @click="delX1Rs(rels)"
-                  size="small"></Button>
           <span class="attrName">{{attrVO}}</span> {{pred2str(rels[0].pred)}}
-          <Tag v-for="r in rels" closable @on-close="delX1R(r)">
+          <Tag v-for="r in rels">
             <a :href="link(r.dst)">{{r.dst}}</a>
           </Tag>
-          <Input class="adder" size="small" placeholder="关联新属性值" @on-enter="addX1RtoLast(rels,$event)"/>
         </li>
-
-        <li>
-          <Button shape="circle" type="dashed" icon="plus" class="btn-add" size="small"></Button>
-
-          <Input v-model="editor.x1RelToAdd.attr" placeholder="属性名" size="small" style="width:140px;"/>
-          <Input v-model="editor.x1RelToAdd.attrx" placeholder="补充属性名" size="small" style="width:80px;"/>
-
-          <Select title="谓词" v-model="editor.x1RelToAdd.pred" size="small" style="width:60px">
-            <Option v-for="(txt,val) in predMap" :value="val" :key="val">{{txt}}</Option>
-          </Select>
-          <Input v-model="editor.x1RelToAdd.dst" placeholder="属性值，若填多个以空格隔开" size="small"
-                 @on-enter="addX1R" style="width:280px;"/>
-
-
-        </li>
-
       </ul>
-
 
       <h3>引用</h3>
       <ul>
@@ -117,6 +62,7 @@
 </template>
 
 <script>
+  import WordEdit from '@/views/WordEdit'
   import _ from 'lodash'
   import DAGVisitor from '../utils/DAGVisitor'
   import Objects from '../utils/Objects'
