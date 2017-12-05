@@ -2,7 +2,7 @@ require('./check-versions')()
 let appConfigDefault = require('../config/sk2/app-conf-default')
 let config = require('../config')
 if (!process.env.NODE_ENV) {
-  process.env.NODE_sENV = JSON.parse(config.dev.env.NODE_ENV)
+  process.env.NODE_ENV = JSON.parse(config.dev.env.NODE_ENV)
 }
 
 let opn = require('opn')
