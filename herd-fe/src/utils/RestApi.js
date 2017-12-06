@@ -81,8 +81,6 @@ export default class RestApi {
 
   httpPost (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
     const finalUrl = this.baseUrl
-    var data = new FormData()
-    data.append('json', JSON.stringify(params))
     fetch(finalUrl, {
       method: 'POST',
       headers: defaultHeaders,

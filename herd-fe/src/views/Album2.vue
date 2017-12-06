@@ -43,7 +43,7 @@
 
 </template>
 <script>
-  import herdService from '../apis/HerdApi'
+  import herdApi from '../apis/HerdApi'
   import Dates from '../utils/Dates'
   import TextUtils from '../utils/Texts'
   import Arrays from '../utils/Arrays'
@@ -67,11 +67,11 @@
     },
 
     methods: {
-      getUrlByHash: herdService.getUrlByHash,
+      getUrlByHash: herdApi.getUrlByHash,
       load () {
         console.log('loading')
         // load timeline bar
-        herdService.countImageMediasByMonth(null, res => {
+        herdApi.countImageMediasByMonth(null, res => {
           this.imgBigCates = res.map(e => ({
             year: e[0],
             month: e[1],
@@ -94,7 +94,8 @@
       },
       loadImages (params) {
         Object.assign(params, {o: '-exifDateTime'})
-        herdService.listImageMedias(params, res => {
+        console.log(params)
+        herdApi.listImageMedias(params, res => {
           res.forEach(imageMedia => this._addImageMediaToCates(imageMedia))
         })
       },
