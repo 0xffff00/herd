@@ -1,10 +1,14 @@
 <template>
-  <div id="word-manager">
-    <h1>{{word.text}} - 详情 - 编辑</h1>
-    <ButtonGroup shape="circle">
-      <Button type="ghost" icon="ios-plus-empty" @click="">保存</Button>
-      <Button type="error" icon="trash-a" disabled>删除</Button>
-    </ButtonGroup>
+  <div id="word-editor">
+    <h1>{{word.text}} - 编辑中
+      <a :href="linkV(word.text)">
+        <Button type="info" shape="circle" size="small">预览</Button>
+      </a>
+      <ButtonGroup shape="circle" size="small">
+        <Button type="ghost" icon="ios-plus-empty" @click="">保存</Button>
+        <Button type="error" icon="trash-a" disabled>删除</Button>
+      </ButtonGroup>
+    </h1>
     <h2>描述</h2>
     <div>
       <Input v-model="word.desc" type="textarea" :rows="4" placeholder="描述"/>
@@ -77,27 +81,30 @@
       <h3>属性</h3>
       <ul>
         <li v-for="(rels,attrVO) in attributeRMG">
-          <Button shape="circle" type="ghost" icon="close" class="btn-del" @click="delX1Rs(rels)"
+          <span class="x1rmg">
+          <Button shape="circle" type="error" icon="close" class="btn-del" @click="delX1Rs(rels)"
                   size="small"></Button>
           <span class="attrName">{{attrVO}}</span> {{pred2str(rels[0].pred)}}
           <Tag v-for="r in rels" closable @on-close="delX1R(r)">
             <a :href="link(r.dst)">{{r.dst}}</a>
           </Tag>
-          <Input class="adder" size="small" placeholder="关联新属性值" @on-enter="addX1RtoLast(rels,$event)"/>
+            <Input class="adder" size="small" placeholder="关联新属性值" @on-enter="addX1RtoLast(rels,$event)"/>
+            </span>
+
         </li>
 
         <li>
-          <Button shape="circle" type="dashed" icon="plus" class="btn-add" size="small"></Button>
-
+          <span class="x1rmg x1rmg-add">
+            <Icon type="plus-round" class="icon-add"></Icon>
           <Input v-model="editor.x1RelToAdd.attr" placeholder="属性名" size="small" style="width:140px;"/>
-          <Input v-model="editor.x1RelToAdd.attrx" placeholder="补充属性名" size="small" style="width:80px;"/>
+          (<Input v-model="editor.x1RelToAdd.attrx" placeholder="补充属性名" size="small" style="width:80px;"/>)
 
           <Select title="谓词" v-model="editor.x1RelToAdd.pred" size="small" style="width:60px">
             <Option v-for="(txt,val) in predMap" :value="val" :key="val">{{txt}}</Option>
           </Select>
           <Input v-model="editor.x1RelToAdd.dst" placeholder="属性值，若填多个以空格隔开" size="small"
                  @on-enter="addX1R" style="width:280px;"/>
-
+        </span>
 
         </li>
 
@@ -108,6 +115,22 @@
       <ul>
         <li v-for="r in word.referenceRS0">
           <a :href="link(r.src)">{{r.src}}</a> 的 {{r.attr}} {{pred2str(r.pred)}} {{r.dst}}
+        </li>
+        <li>
+          <span class="x1rmg x1rmg-add">
+             <Icon type="plus-round" class="icon-add"></Icon>
+             <Input v-model="editor.x1RelToAdd2.src" placeholder="主语，若填多个以空格隔开" size="small"
+                    @on-enter="addX1R2" style="width:280px;"/>的
+          <Input v-model="editor.x1RelToAdd2.attr" placeholder="属性名" size="small" style="width:140px;"/>
+          (<Input v-model="editor.x1RelToAdd2.attrx" placeholder="补充属性名" size="small" style="width:80px;"/>)
+
+          <Select title="谓词" v-model="editor.x1RelToAdd2.pred" size="small" style="width:60px">
+            <Option v-for="(txt,val) in predMap" :value="val" :key="val">{{txt}}</Option>
+          </Select>
+            {{word.text}}
+
+        </span>
+
         </li>
       </ul>
     </div>
@@ -184,7 +207,8 @@
           loading: false
         },
         editor: {
-          x1RelToAdd: {pred: 'IS'}
+          x1RelToAdd: {pred: 'IS'},
+          x1RelToAdd2: {pred: 'IS'}
         },
         predMap: predMap
       }
@@ -294,6 +318,10 @@
         this.editor.x1RelToAdd.src = this.word.text
         DictApi.x1Relations.httpPost(this.editor.x1RelToAdd, this.notifyOkay('添加属性'), this.notifyFail('添加属性'))
       },
+      addX1R2 () {
+        this.editor.x1RelToAdd2.dst = this.word.text
+        DictApi.x1Relations.httpPost(this.editor.x1RelToAdd2, this.notifyOkay('添加属性'), this.notifyFail('添加属性'))
+      },
       delX1R (rel) {
         DictApi.x1Relations.httpDelete(rel, this.notifyOkay('移除属性'), this.notifyFail('移除属性'))
       },
@@ -316,7 +344,9 @@
       link (w) {
         return `../${w}/edit`
       },
-
+      linkV (w) {
+        return `../${w}/view`
+      },
       loadItem () {
         const self = this
         let w = this.word.text
@@ -329,18 +359,22 @@
         }, self.notifyFail('加载词汇'))
       },
 
-      notifyOkay (what) {
+      notifyOkay (actionName) {
         const self = this
         return d => {
-          let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + what : '')
-          self.$notify.success({title: what + '成功', message: msg})
+          let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + actionName : '')
+          self.$notify.success({title: actionName + '成功', message: msg})
           self.loadItem()
         }
       },
-      notifyFail (what) {
+      notifyFail (actionName) {
         const self = this
         return d => {
-          self.$notify.error({title: what + '失败', message: d.message, duration: 0})
+          let msg = d.message || ''
+          if (d.debugInfo) {
+            msg += d.debugInfo.message
+          }
+          self.$notify.error({title: actionName + '失败', message: msg, duration: 0})
         }
       },
       rel2id: rel2id,
@@ -350,14 +384,20 @@
     }
   }
 </script>
-<style scoped>
-  #word-edit a {
+<style>
+  #word-editor a {
     text-decoration: none;
     color: inherit;
   }
 
-  .adder {
+  #word-editor .adder {
     width: 10em;
+  }
+
+  #word-editor .adder input {
+    border-style: dashed;
+    border-color: green;
+    height: 22px;
   }
 
   .attrName {
@@ -367,11 +407,51 @@
 
   .btn-del {
     color: rgb(192, 0, 0);
-    border-color: rgba(192, 0, 0, .5);
+    background: rgba(192, 0, 0, .1);
+    border-color: rgba(192, 0, 0, .2);
   }
 
   .btn-add {
     color: rgba(0, 96, 0, .5);;
     border-color: rgba(0, 96, 0, .5);
+  }
+
+  #word-editor .ivu-tag-closable {
+    border-style: solid;
+    border-color: #aa0000;
+    color: #c70000;
+    background: transparent;
+  }
+
+  #word-editor .ivu-tag-closable .ivu-tag-text {
+    color: #c70000;
+  }
+
+  #word-editor .ivu-tag-closable .ivu-icon {
+    color: red;
+  }
+
+  #word-editor #x1-rels li {
+    margin: 6px;
+  }
+
+  #word-editor #x1-rels li .x1rmg {
+    border: none 1px #c70000;
+    border-radius: 6px;
+    margin: 3px 7px;
+    padding: 5px 5px 7px;
+  }
+
+  #word-editor #x1-rels li .x1rmg.x1rmg-add {
+    border: dashed 1px green;
+  }
+
+  #word-editor #x1-rels li .x1rmg.x1rmg-add input {
+    border: solid 1px rgba(0, 72, 0, .1);
+  }
+
+  #word-editor .icon-add {
+    color: green;
+    margin: 0 7px;
   }
 </style>
