@@ -320,7 +320,7 @@
       },
       addX1R2 () {
         this.editor.x1RelToAdd2.dst = this.word.text
-        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd2, this.notifyOkay('添加属性'), this.notifyFail('添加属性'))
+        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd2, this.notifyOkay('添加引用'), this.notifyFail('添加引用'))
       },
       delX1R (rel) {
         DictApi.x1Relations.httpDelete(rel, this.notifyOkay('移除属性'), this.notifyFail('移除属性'))

@@ -5,4 +5,9 @@ const buildQueryUrl = function (urlStr, params) {
   }
   return url.href
 }
-export default {buildQueryUrl}
+
+const getCurrentUrlPathname = function () {
+  // TODO maybe not right
+  return window.location.pathname
+}
+export default {buildQueryUrl, getCurrentUrlPathname}

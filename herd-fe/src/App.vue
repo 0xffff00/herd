@@ -1,32 +1,43 @@
 <template>
   <div id="layout">
-    <Menu mode="horizontal" active-name="1">
+    <Menu mode="horizontal" :active-name="activeName" @on-select="selectMenu">
 
       <div class="layout-nav">
         <router-link to="/hello">
-          <MenuItem name="hello">
+          <MenuItem name="/hello">
             <Icon type="home"></Icon>
             首页
           </MenuItem>
         </router-link>
         <router-link to="/album2">
-          <MenuItem name="1">
+          <MenuItem name="/album2">
             <Icon type="images"></Icon>
             相册
           </MenuItem>
         </router-link>
         <router-link to="/repo-man">
-        <MenuItem name="2">
-          <Icon type="ios-folder-outline"></Icon>
-          仓库管理
-        </MenuItem></router-link>
+          <MenuItem name="/repo-man">
+            <Icon type="ios-folder-outline"></Icon>
+            仓库管理
+          </MenuItem>
+        </router-link>
+
+        <router-link to="/word-man">
+          <MenuItem name="/word-man">
+            <Icon type="ios-folder-outline"></Icon>
+            词汇管理
+          </MenuItem>
+        </router-link>
+
         <Submenu name="3">
           <template slot="title">
             <Icon type="stats-bars"></Icon>
-            sub111
+            DEV-ONLY
           </template>
-          <MenuGroup title="使用">
-            <MenuItem name="3-1">新增和启动</MenuItem>
+          <MenuGroup title="words">
+            <router-link to="/words/复旦大学/edit">
+              <MenuItem name="/word-man22">/words/复旦大学/edit</MenuItem>
+            </router-link>
             <MenuItem name="3-2">活跃分析</MenuItem>
             <MenuItem name="3-3">时段分析</MenuItem>
           </MenuGroup>
@@ -35,16 +46,6 @@
             <MenuItem name="3-5">流失用户</MenuItem>
           </MenuGroup>
         </Submenu>
-        <router-link to="/word-man">
-          <MenuItem name="词汇管理">
-            <Icon type="ios-folder-outline"></Icon>
-            词汇管理
-          </MenuItem></router-link>
-        <router-link to="/words/复旦大学/edit">
-          <MenuItem name="词汇编辑">
-            词汇编辑
-          </MenuItem></router-link>
-
       </div>
     </Menu>
 
@@ -73,18 +74,29 @@
   import hello from './components/Hello'
   import a1 from './components/a1'
   import album from './views/Album2'
+  import Urls from './utils/Urls'
 
   export default {
     name: 'app',
     data () {
       return {
-        'active-name': 'hello'
+        activeName: 'home'
       }
+    },
+    methods: {
+      selectMenu (name) {
+        console.log(name)
+      }
+    },
+    created () {
+      let path = Urls.getCurrentUrlPathname()
+      this.activeName = path
     },
     components: {
       hello, a1, album
     }
   }
+
 </script>
 
 <style scoped>
