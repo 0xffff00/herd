@@ -1,8 +1,24 @@
 <template>
   <TableMan :data="data" :ui.sync="ui" :model="model"
             :querier="querier">
-    <div slot="criteriaPane">
-      <div>ssx
+    <div slot="criteria-pane">
+      <div>
+        <p>
+        <Button type="warning" @click="actOnRepos('sync')">同步仓库</Button>
+        <Button type="warning" @click="actOnRepos('sync.path')">同步Path</Button>
+        <Button type="warning" @click="actOnRepos('sync.info.brief')">同步简要信息</Button>
+        <Button type="warning" @click="actOnRepos('sync.info.senior')">同步高级信息</Button>
+        </p>
+        <p>
+          <Button type="error" @click="actOnRepos('clear')">清空仓库</Button>
+          <Button type="error" @click="actOnRepos('clear.path')">清空Path</Button>
+          <Button type="error" @click="actOnRepos('clear.info.brief')">清空简要信息</Button>
+          <Button type="error" @click="actOnRepos('clear.info.senior')">清空高级信息</Button>
+
+        </p>
+        <p>
+          <Button type="warning" @click="actOnRepos('convert2jpg.1Kq5')">jpg批量压缩</Button>
+        </p>
         <!--<el-form :inline="true" :model="querier">-->
         <!--<el-form-item label="词语">-->
         <!--<el-input v-model="querier.criteria[0].value" placeholder="词语"></el-input>-->
@@ -18,7 +34,6 @@
         <!--<el-button type="primary" @click="submitQuerierForm"><i class="fa fa-search"></i>查询</el-button>-->
         <!--</el-form-item>-->
         <!--</el-form>-->
-        <el-button type="primary" @click="ui.loadTick++"><i class="fa fa-search"></i>查询</el-button>
       </div>
       <div>
         <!--<el-tag v-for="crit in querier.criteria" v-if="crit.value" :key="crit.name" :closable="true"-->
@@ -33,7 +48,7 @@
   </TableMan>
 </template>
 <script>
-  import herdService from '../apis/HerdApi'
+  import herdApi from '../apis/HerdApi'
   import Dates from '../utils/Dates'
   import TextUtils from '../utils/Texts'
   import Arrays from '../utils/Arrays'
@@ -65,7 +80,7 @@
           criteria: []
         },
         model: {
-          api: herdService.repoRestApi,
+          api: herdApi.repoRestApi,
           name: '仓库',
           columnDefault: {
             required: false,
@@ -114,7 +129,28 @@
         return (this.ui.currItem) ? '新增' + n : '修改' + n
       }
     },
-    methods: {},
+    methods: {
+      actOnRepos (action) {
+        herdApi.ajaxActOnRepo(action)(null, this.notifyOkay(action), this.notifyFail(action))
+      },
+      notifyOkay (actionName) {
+        const self = this
+        return d => {
+          let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + actionName : '')
+          self.$notify.success({title: actionName + '成功', message: JSON.stringify(msg)})
+        }
+      },
+      notifyFail (actionName) {
+        const self = this
+        return d => {
+          let msg = d.message || ''
+          if (d.debugInfo) {
+            msg += d.debugInfo.message
+          }
+          self.$notify.error({title: actionName + '失败', message: msg, duration: 0})
+        }
+      }
+    },
     components: {TableMan}
   }
 </script>

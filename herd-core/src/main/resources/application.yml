@@ -4,8 +4,12 @@ spring:
     url: jdbc:mariadb://10.0.0.101:3306/skean0
     username: skean
     password: skean
-  output:
-    ansi.enabled: ALWAYS
+
+  #output:
+  #  ansi.enabled: ALWAYS
+
+  jackson:
+    serialization.write_dates_as_timestamps: false
 
 server:
   port: 8980
@@ -20,4 +24,4 @@ skean:
       print-sql-result-strategy: REFLECTION
 
 herd:
-  localThumbnailRepoPath: D:/tmp/herdThumbs
+  localThumbnailRepoPath: /tmp/herd/thumbs

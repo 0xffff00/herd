@@ -1,7 +1,7 @@
 package tmp.learning;
 
 import party.threebody.herd.webapp.domain.ImageMedia;
-import party.threebody.skean.jdbc.util.JavaBeans;
+import party.threebody.skean.lang.Beans;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -33,7 +33,7 @@ public class LearnBeanReflect {
 
 
         ImageMedia imageMedia = new ImageMedia();
-        System.out.println(JavaBeans.convertBeanToSimpleMap(imageMedia));
+        System.out.println(Beans.convertBeanToSimpleMap(imageMedia));
 
     }
 

@@ -6,5 +6,5 @@
  ▒ ░░▒░▒░░ ▒░ ░░ ▒▓ ░▒▓░ ▒▒▓  ▒
  ▒ ░▒░ ░ ░ ░  ░  ░▒ ░ ▒░ ░ ▒  ▒
  ░  ░░ ░   ░     ░░   ░  ░ ░  ░
-${Ansi.YELLOW}:: Herd-Webapp ::${Ansi.DEFAULT} ${application.formatted-version}
+${Ansi.YELLOW}:: herd-core ::${Ansi.DEFAULT} ${application.version}
       ░  ░  ░      ░  ░     ░  ░         ░

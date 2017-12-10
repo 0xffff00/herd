@@ -7,7 +7,7 @@ import party.threebody.skean.data.PrimaryKey
 import javax.persistence.Table
 import java.time.LocalDateTime
 
-@Table(name="hd_media_path")
+@Table(name="hd_media")
 class Media {
     @PrimaryKey String hash
     @Column String type
@@ -26,7 +26,7 @@ class Media {
     }
 
 }
-@Table(name="hd_media")
+@Table(name="hd_media_path")
 class MediaPath {
     @PrimaryKey String hash
     @PrimaryKey String path
