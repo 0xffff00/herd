@@ -8,8 +8,8 @@ configure(allprojects) { project ->
             'mariadb-java-client': '2.1.1',
             'HikariCP'           : '2.7.1',
             'spring-boot'        : '2.0.0.M4',
-
-            'skean'              : '2.2.0'
+            'h2'                 : '1.4.196',
+            'skean'              : '2.3.0'
     ]
 
     repositories {
