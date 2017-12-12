@@ -11,20 +11,23 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * image basic & EXIF meta info
+ */
 @Table(name = "hd_media_image")
 public class ImageMedia {
-    protected @PrimaryKey String hash;
-    protected @Column String type;
-    protected @Column @NotNull int height;
-    protected @Column @NotNull int width;
-    protected @Column @NotNull int exifBitDepth;
-    protected @Column String exifMake;
-    protected @Column String exifModel;
-    protected @Column LocalDateTime exifDateTime;
-    protected @Column String exifColorSpace;
-    protected @Column String exifExposureTime;
-    protected @Column String exifWhiteBalance;
-    protected @Column String exifAperture;
+    private @PrimaryKey String hash;
+    private  @Column String type;
+    private @Column @NotNull int height;
+    private @Column @NotNull int width;
+    private @Column @NotNull int exifBitDepth;
+    private @Column String exifMake;
+    private @Column String exifModel;
+    private @Column LocalDateTime exifDateTime;
+    private @Column String exifColorSpace;
+    private @Column String exifExposureTime;
+    private @Column String exifWhiteBalance;
+    private @Column String exifAperture;
 
     //----DTO props-----
     protected Integer fileSize;

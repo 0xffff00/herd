@@ -13,7 +13,7 @@ class Media {
     @Column String type
     @Column String subtype
     @Column String desc
-    @Column Integer size
+    @Column Integer size    //size in byte
     @LastUpdateTime LocalDateTime syncTime
 
     //DTO fields
