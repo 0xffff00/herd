@@ -1,47 +1,41 @@
 package party.threebody.herd.webapp.service;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import party.threebody.herd.job.Job;
-import party.threebody.herd.job.JobStatus;
-import party.threebody.herd.job.JobStepResult;
-import party.threebody.herd.webapp.dao.MediaPathDao;
-import party.threebody.herd.webapp.dao.RepoDao;
-import party.threebody.herd.webapp.domain.MediaPath;
-import party.threebody.herd.webapp.domain.Repo;
+import party.threebody.herd.job.ComposedLinarJob;
+import party.threebody.herd.job.LinarJob;
 import party.threebody.skean.misc.SkeanException;
-import party.threebody.skean.web.SkeanNotFoundException;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
-@Service
-public abstract class MonoBatchSyncJob extends Job {
-    static final Logger logger = LoggerFactory.getLogger(MonoBatchSyncJob.class);
+/**
+ * exclusive job for batch-sync per database.
+ * using Record Lock of MySQL InnoDB.
+ */
+public class MonoBatchSyncJob extends ComposedLinarJob {
+    BatchSyncService batchSyncService;
 
-    @Autowired BatchSyncService batchSyncService;
 
-    abstract void execute0() throws Exception;
+    public static MonoBatchSyncJob of(BatchSyncService batchSyncService, LinarJob... children) {
+        return new MonoBatchSyncJob(batchSyncService, children);
+    }
 
-    @Transactional
-    public void excute() {
+    protected MonoBatchSyncJob(BatchSyncService batchSyncService, LinarJob... children) {
+        super(Arrays.asList(children));
+        this.batchSyncService = batchSyncService;
+    }
+
+
+    @Override
+    public void start() {
         try {
             batchSyncService.takeRepoSyncLock();
-            execute0();
-        } catch (Exception e) {
-            throw new SkeanException("excute job failed.", e);
+            super.start();
+        } catch (SkeanException e) {
+            throw e;
+        } catch (RuntimeException e1) {
+            throw new SkeanException("do MonoBatchSyncJob failed.", e1);
         } finally {
             batchSyncService.releaseRepoSyncLock();
         }
+
     }
 }

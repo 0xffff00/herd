@@ -4,8 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import party.threebody.herd.webapp.dao.*;
+import party.threebody.herd.webapp.domain.MediaPath;
 import party.threebody.herd.webapp.domain.Repo;
 import party.threebody.skean.web.SkeanConflictException;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -19,8 +23,10 @@ public class BatchSyncService {
     @Autowired ImageMediaDao imageMediaDao;
     @Autowired MetaDao metaDao;
 
-    MediaPathSyncJob mediaPathSyncJob;
 
+    /**
+     * using Record Lock of MySQL InnoDB.
+     */
     @Transactional
     public void takeRepoSyncLock() {
         boolean got = metaDao.getRepoSyncLock();
@@ -31,14 +37,8 @@ public class BatchSyncService {
 
     @Transactional
     public void releaseRepoSyncLock() {
-         metaDao.releaseRepoSyncLock();
+        metaDao.releaseRepoSyncLock();
     }
 
-
-
-
-    public void clearMediaPathsByRepo(Repo repo) {
-
-    }
 
 }
