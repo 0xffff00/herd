@@ -15,10 +15,13 @@ export default class RestApi {
     this.baseUrl = baseUrl
     if (typeof soloUrlTemplate === 'string') {
       this.soloUrlBuilder = (params) => {
-        let u = baseUrl + soloUrlTemplate
-        Object.keys(params).forEach(key => {
-          u = u.replace('{' + key + '}', params[key])
-        })
+        let u = baseUrl + (soloUrlTemplate || '')
+        if (params) {
+          Object.keys(params).forEach(key => {
+            u = u.replace('{' + key + '}', params[key])
+          })
+        }
+
         return u
       }
     } else if (typeof soloUrlTemplate === 'function') {

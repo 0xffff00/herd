@@ -15,10 +15,10 @@ public class BasicJobStatus implements JobStatus {
     private int totalSteps;
 
 
-    private Map<String, AtomicInteger> cntMap;   //resultTag -> count
+    private Map<String, AtomicInteger> results;   //result tag -> count
 
     public BasicJobStatus(int totalSteps) {
-        cntMap = new HashMap<>(8);
+        results = new HashMap<>(8);
         this.totalSteps = totalSteps;
         this.currentStep = new AtomicInteger();
     }
@@ -56,9 +56,9 @@ public class BasicJobStatus implements JobStatus {
      * check of current step as a resultTag
      */
     public void as(String resultTag) {
-        AtomicInteger old = cntMap.get(resultTag);
+        AtomicInteger old = results.get(resultTag);
         if (old == null) {
-            cntMap.put(resultTag, new AtomicInteger(1));
+            results.put(resultTag, new AtomicInteger(1));
         } else {
             old.incrementAndGet();
         }
@@ -105,11 +105,11 @@ public class BasicJobStatus implements JobStatus {
      * resultTag -> count
      * @return
      */
-    public Map<String, AtomicInteger> getCntMap() {
-        return cntMap;
+    public Map<String, AtomicInteger> getResults() {
+        return results;
     }
 
-    public void setCntMap(Map<String, AtomicInteger> cntMap) {
-        this.cntMap = cntMap;
+    public void setResults(Map<String, AtomicInteger> results) {
+        this.results = results;
     }
 }

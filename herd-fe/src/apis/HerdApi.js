@@ -32,6 +32,26 @@ const countImageMediasByYear = ajaxList(CTX + '/imageMedias/countByYear')
 const countImageMediasByMonth = ajaxList(CTX + '/imageMedias/countByMonth')
 const repoRestApi = new RestApi(CTX + '/repos/', '{name}')
 
+let clear = (repoName, okayCallback, failCallback) => {
+  fetch(CTX + '/batch-sync/media-paths?repoName=' + repoName, {method: 'DELETE', headers: DEFAULT_HEADERS})
+    .then(responding(okayCallback, failCallback))
+}
+let sync = (repoName, okayCallback, failCallback) => {
+  fetch(CTX + '/batch-sync/media-paths?repoName=' + repoName, {method: 'PUT', headers: DEFAULT_HEADERS})
+    .then(responding(okayCallback, failCallback))
+}
+let st2 = (okayCallback, failCallback) => {
+  fetch(CTX + '/batch-sync/media-paths/status/flatten', {method: 'GET', headers: DEFAULT_HEADERS})
+    .then(responding(okayCallback, failCallback))
+}
+const batchSync = {
+  mediaPaths: {
+    clear: clear,
+    sync: sync,
+    st2: st2
+  }
+
+}
 // const repoSync = ajaxActOnRepo('sync')
 // const repoSyncPath = ajaxActOnRepo('sync.path')
 // const repoSyncInfoBrief = ajaxActOnRepo('sync.info.brief')
@@ -51,7 +71,8 @@ export default {
   countImageMediasByYear,
   countImageMediasByMonth,
   repoRestApi,
-  ajaxActOnRepo
+  ajaxActOnRepo,
+  batchSync
   // repoSync,
   // repoSyncPath,
   // repoSyncInfoBrief,

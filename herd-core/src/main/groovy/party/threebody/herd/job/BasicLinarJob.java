@@ -60,7 +60,7 @@ public abstract class BasicLinarJob<C> implements LinarJob {
         for (C item : consumers) {
             startNextStep(item);
         }
-        logger.info("Job[{}] Finished. {}", getName(), status.getCntMap());
+        logger.info("Job[{}] Finished. {}", getName(), status.getResults());
     }
 
     protected void startNextStep(C consumer) {

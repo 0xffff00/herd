@@ -3,11 +3,27 @@
             :querier="querier">
     <div slot="criteria-pane">
       <div>
+
         <p>
-        <Button type="warning" @click="actOnRepos('sync')">同步仓库</Button>
-        <Button type="warning" @click="actOnRepos('sync.path')">同步Path</Button>
-        <Button type="warning" @click="actOnRepos('sync.info.brief')">同步简要信息</Button>
-        <Button type="warning" @click="actOnRepos('sync.info.senior')">同步高级信息</Button>
+
+          <Button type="warning" @click="mp_clear('CUsershzkPictures')">mp_clear</Button>
+          <Button type="warning" @click="mp_sync('CUsershzkPictures')">mp_sync</Button>
+        </p>
+
+        <i-circle :percent="syncPercent">
+          <span>{{ syncPercent }}%</span>
+        </i-circle>
+        <p>
+          <span>{{ sync.current }} / {{ sync.total }}  {{sync.msg}}</span>
+
+
+        </p>
+        <br>
+        <p>
+          <Button type="warning" @click="actOnRepos('sync')">同步仓库</Button>
+          <Button type="warning" @click="actOnRepos('sync.path')">同步Path</Button>
+          <Button type="warning" @click="actOnRepos('sync.info.brief')">同步简要信息</Button>
+          <Button type="warning" @click="actOnRepos('sync.info.senior')">同步高级信息</Button>
         </p>
         <p>
           <Button type="error" @click="actOnRepos('clear')">清空仓库</Button>
@@ -54,10 +70,22 @@
   import Arrays from '../utils/Arrays'
   import TableMan from '../components/TableMan'
 
+  function loopExec (maxTurns, interval, cond, func) {
+    for (var i = 0; i < maxTurns && cond(); i++) {
+      setTimeout(func, i * interval)
+    }
+  }
+
   export default {
     name: 'repo-man',
     data () {
       return {
+        sync: {
+          running: false,
+          current: 0,
+          total: 0,
+          msg: null
+        },
         data: {
           result: {
             items: [],
@@ -127,9 +155,32 @@
       'ui.editor.title': function () {
         let n = this.itemName
         return (this.ui.currItem) ? '新增' + n : '修改' + n
+      },
+      'syncPercent': function () {
+        return Math.floor(this.sync.current / this.sync.total * 100)
       }
     },
     methods: {
+      mp_clear (repoName) {
+        herdApi.batchSync.mediaPaths.clear({repoName: repoName}, this.notifyOkay, this.notifyFail)
+      },
+      mp_sync (repoName) {
+        let self = this
+        herdApi.batchSync.mediaPaths.sync({repoName: repoName}, this.notifyOkay, this.notifyFail)
+        self.sync.running = true
+        loopExec(40, 500,
+          () => self.sync.running,
+          () => {
+            herdApi.batchSync.mediaPaths.st2(d => {
+              console.log(d)
+              self.sync.current = d.current
+              self.sync.total = d.totalSteps
+            }, self.notifyFail)
+          })
+      },
+      mp_st2 () {
+        herdApi.batchSync.mediaPaths.st2({}, this.notifyOkay, this.notifyFail)
+      },
       actOnRepos (action) {
         herdApi.ajaxActOnRepo(action)(null, this.notifyOkay(action), this.notifyFail(action))
       },
