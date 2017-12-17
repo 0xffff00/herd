@@ -75,9 +75,7 @@ module.exports = {
       //   use: [
       //     {
       //       loader: 'vue-loader',
-      //       options: {
-      //
-      //       }
+      //       options: {}
       //     },
       //     {
       //       loader: 'iview-loader',

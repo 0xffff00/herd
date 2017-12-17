@@ -38,7 +38,9 @@
             <router-link to="/words/复旦大学/edit">
               <MenuItem name="/word-man22">/words/复旦大学/edit</MenuItem>
             </router-link>
-            <MenuItem name="3-2">活跃分析</MenuItem>
+            <router-link to="/words/复旦大学/edit">
+              <MenuItem name="/word-man22">/words/复旦大学/edit</MenuItem>
+            </router-link>
             <MenuItem name="3-3">时段分析</MenuItem>
           </MenuGroup>
           <MenuGroup title="留存">
@@ -71,8 +73,7 @@
 </template>
 
 <script>
-  import hello from './components/Hello'
-  import a1 from './components/a1'
+  import hello from './views/Hello'
   import album from './views/Album2'
   import Urls from './utils/Urls'
 
@@ -92,9 +93,7 @@
       let path = Urls.getCurrentUrlPathname()
       this.activeName = path
     },
-    components: {
-      hello, a1, album
-    }
+    components: {hello, album}
   }
 
 </script>

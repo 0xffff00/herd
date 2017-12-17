@@ -34,17 +34,24 @@
       <Modal v-model="ui.editing" :loading="ui.saving" :title="editorTitle" :ok-text="editorOkText"
              @on-ok="saveItem()" @on-cancel="">
         <Form :model="data.editor.item" :label-width="80">
-          <template v-for="col in computedModel.columns">
-            <FormItem :label="col.title">
-              <template v-if="col.key && col.editable">
-                <Input v-model="data.editor.item[col.key]" :placeholder="'请输入'+col.key"></Input>
+          <FormItem v-for="col in computedModel.columns" v-if="!col.hideInEditor" :label="col.title">
+            {{col.hideInEditor}}
+            <template v-if="col.key && col.editable">
+              <template v-if="col.sk2template==='state'">
+                <RadioGroup v-model="data.editor.item[col.key]" type="button">
+                  <Radio label="A" color="red">活动的</Radio>
+                  <Radio label="S">停止的</Radio>
+                </RadioGroup>
               </template>
               <template v-else>
-                {{data.editor.item[col.key]}}
+                <Input v-model="data.editor.item[col.key]" :placeholder="'请输入'+col.key"></Input>
               </template>
+            </template>
+            <template v-else>
+              {{data.editor.item[col.key]}}
+            </template>
 
-            </FormItem>
-          </template>
+          </FormItem>
         </Form>
       </Modal>
 
@@ -55,7 +62,16 @@
 </template>
 
 <script>
+  /**
+   * offer a common rich table module.
+   * implemented by wrapping a iView Table.
+   * it has functions:
+   *  - management operations such as CRUD
+   *  - pagination, sorting by column
+   *  - query by criteria
+   */
   import _ from 'lodash'
+  import Renders from './TableManRenders'
 
   export default {
     name: 'table-man',
@@ -81,25 +97,32 @@
           y.required = x.required || columnDefault.required
           y.editable = x.editable || columnDefault.editable
           y.sortable = x.sortable || columnDefault.sortable
-
-          if (x['sk-template'] === 'action') {
-            y.editable = false
-            y.render = (h, params) => h('div', {}, [
-              rPopDel(self)(h, params),
-              rBtnEdit(self)(h, params)
-            ])
-
-            console.log(y)
+          y.sk2template = x.sk2template
+          if (y.sk2template === 'action') {
+            let sk2actions = x.sk2actions
+            y.hideInEditor = true
+            if (sk2actions && sk2actions.length) {
+              // replace constant templates
+              let _x1 = sk2actions.findIndex(x => x === 'edit')
+              if (_x1 >= 0) {
+                sk2actions[_x1] = {actionName: '编辑', actionFunc: self.openEditorDialog, renderType: 'rBtn'}
+              }
+              let _x2 = sk2actions.findIndex(x => x === 'delete')
+              if (_x2 >= 0) {
+                sk2actions[_x2] = {actionName: '删除', actionFunc: self.deleteItem}
+              }
+              y.render = (h, params) => {
+                let renders = Renders.resolveToRenders(sk2actions, self, h, params)
+                return h('ButtonGroup', {}, renders)
+              }
+            }
           }
-
-          if (x['sk-template'] === 'sk.man2.state') {
-            y.render = rState(self)(y.key)
+          if (y.sk2template === 'state') {
+            y.render = Renders.rState(self)(y.key)
           }
           return y
         })
-        return {
-          columns
-        }
+        return {columns}
       },
       translatedQuerierParams () {
         let q = this.querier
@@ -146,28 +169,29 @@
         self.model.api.httpGetSome(
           self.translatedQuerierParams,
           d => {
-            self.data.result.items = d.items
-            self.data.result.totalCount = parseInt(d.totalCount)
+            console.log(d)
+            self.data.result.items = d.data
+            self.data.result.totalCount = d.totalCount
             // self.$message({type: 'success', message: '加载成功 x ' + self.ui.loadTick})
             self.ui.loading = false
           },
           self.notifyFail('加载')
         )
       },
-      deleteItem () {
+      deleteItem (item) {
         const self = this
         self.ui.deleting = true
-        self.model.api.httpDelete(self.data.deleter.item, self.notifyOkay('删除'), self.notifyFail('删除'))
+        self.model.api.httpDelete(item, self.notifyAffectOk('删除'), self.notifyFail('删除'))
       },
       saveItem () {
         const self = this
         this.ui.saving = true
         const isNew = self.data.editor.itemOld === null
         if (isNew) {
-          self.model.api.httpPost(self.data.editor.item, self.notifyOkay('创建'), self.notifyFail('创建'))
+          self.model.api.httpPost(self.data.editor.item, self.notifyAffectOk('创建'), self.notifyFail('创建'))
         } else {
           const changes = changesOfItem(self.data.editor.itemOld, self.data.editor.item, self.model.columns)
-          self.model.api.httpPatch(self.data.editor.itemOld, changes, self.notifyOkay('更新'), self.notifyFail('更新'))
+          self.model.api.httpPatch(self.data.editor.itemOld, changes, self.notifyAffectOk('更新'), self.notifyFail('更新'))
         }
       },
 
@@ -177,6 +201,10 @@
         if (item === null) {
           this.data.editor.item = _.cloneDeep(this.data.editor.itemDefault)
         }
+      },
+      openEditorDialog (item) {
+        this.data.editor.item = _.cloneDeep(item)
+        this.ui.editing = true
       },
       openConfirmDialog (actionDesc, nextAction) {
         this.$confirm('即将' + actionDesc + ', 是否继续?', '警告', {
@@ -189,26 +217,26 @@
           })
       },
 
-      notifyOkay (what) {
+      notifyAffectOk (actionName) {
         const self = this
         return d => {
-          let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + what : '')
-          self.$notify.success({title: what + '成功', message: msg})
+          let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + actionName : '')
+          self.$notify.success({title: actionName + '成功', message: msg})
           self.ui.editing = false
           self.ui.saving = false
           self.ui.deleting = false
           self.readItems()
         }
       },
-      notifyFail (what) {
+      notifyFail (actionName) {
         const self = this
         return d => {
-          let msg = '[<b>' + d.error + '</b>] '
+          let msg = '[' + d.error + '] '
           msg += (d.message || '')
           if (d.debugInfo) {
             msg += d.debugInfo.message
           }
-          self.$notify.error({title: what + '失败', message: msg, duration: 0})
+          self.$notify.error({title: actionName + '失败', message: msg, duration: 0})
           self.ui.saving = false
           self.ui.deleting = false
           self.ui.loading = false
@@ -253,86 +281,8 @@
     let keysPicked = Object.keys(newItem)
       .filter(k => itemCols.find(col => col.name === k && col.editable) !== null)
       .filter(k => oldItem[k] !== newItem[k])
-    console.log(newItem, oldItem, itemCols, keysPicked, _.pick(newItem, keysPicked))
+    console.log('changesOfItem: ', newItem, oldItem, itemCols, keysPicked, _.pick(newItem, keysPicked))
     return _.pick(newItem, keysPicked)
-  }
-
-  const rBtnEdit = vue => (h, params) => h('Button', {
-    props: {
-      type: 'ghost',
-      shape: 'circle',
-      icon: 'edit'
-    },
-    style: {
-      marginRight: '5px'
-    },
-    on: {
-      click: () => {
-        vue.data.editor.item = params.row
-        vue.ui.editing = true
-      }
-    }
-  })
-
-  const rPopDel = vue => (h, params) => h(
-    'Poptip', {
-      props: {
-        confirm: true,
-        title: '您确认删除这条内容吗？'
-      },
-      on: {
-        'on-ok': () => {
-          vue.data.deleter.item = params.row
-          vue.deleteItem()
-        },
-        'on-cancel': () => {}
-      }
-    },
-    [
-      h('Button', {
-        props: {
-          type: 'error',
-          shape: 'circle',
-          icon: 'trash-a'
-        },
-        style: {
-          marginRight: '5px'
-        }
-      })
-    ]
-  )
-
-  const rState = vue => (key) => (h, params) => {
-    const stateMap = {
-      'A': {text: '活动', color: 'green'},
-      'S': {text: '停止', color: 'red'}
-    }
-    let val = params.row[key]
-    if (!val) {
-      return null
-    }
-    let v = stateMap[val] || {text: val, color: undefined}
-    return h(
-      'Tag', {
-        props: {color: v.color}
-      },
-      v.text
-    )
-  }
-
-  const rRadio = vue => (valMap) => (h, params) => {
-    let radiosArr = valMap.keys().map(k => {
-      let v = valMap[k]
-      return h('Radio', {props: {label: v}}, k)
-    })
-    return h(
-      'RadioGroup', {
-        props: {
-          type: 'button'
-        }
-      },
-      radiosArr
-    )
   }
 
 </script>

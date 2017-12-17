@@ -21,12 +21,17 @@
         <td>{{processEnv}}</td>
       </tr>
     </table>
+    <TimeGrid groupBy="aa21" :data="demo.countsByDate">
+    </TimeGrid>
   </div>
 </template>
 
 <script>
+  import TimeGrid from '../components/TimeGrid.vue'
   import { multiply } from '../learn/1'
   import appConf from '../../config/sk2/app-conf'
+  import moment from 'moment'
+
   function m1 (x, y) {
     return x * y
   }
@@ -39,9 +44,21 @@
       return {
         msg: 'Welcome to ' + m1(2, 4) + multiply(6, 4),
         appConf: appConf,
-        processEnv: process.env
+        processEnv: process.env,
+        demo: {
+          countsByDate: []
+        }
       }
-    }
+    },
+    created () {
+      let now = moment()
+      for (var i = 0; i < 100; i++) {
+        let d = now.add(i, 'd').format('YYYY-MM-DD')
+        let v = Math.max(0, (Math.random() * 11 - 5).toFixed())
+        this.demo.countsByDate.push({date: d, cnt: v})
+      }
+    },
+    components: {TimeGrid}
   }
 </script>
 

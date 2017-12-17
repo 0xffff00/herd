@@ -1,42 +1,47 @@
+import { appendQParams, CB_NO_OP, DEFAULT_HEADERS, responding, respondingAf } from './RestUtils'
 import Urls from './Urls'
-import { responding, responding2, CB_NO_OP, DEFAULT_HEADERS } from './RestUtils'
 
+const stringify = obj => obj ? JSON.stringify(obj) : null
 export default class RestApi {
 
-  /*
-   * const repoRestApi = new RestApi(CTX + '/users/', '?name={name}&team={team}')   // normal style
+  /**
+   * <pre>
+   *  a RestAPI of user's addresses
+   *  templated url: "http:localhost:8080/my-app/users/{uid}/addresses/{addressCode}"
+   *  concete url:   "http:localhost:8080/my-app/users/20032/addresses/mars-olp03-32-1021"
+   *    parts:        |<------ CTX ------------>|
+   *                  |<----------------  pluralUrl ----------------->|<--singularPart-->|
+   *                  |<------------------------ singularUrl --------------------------->|
+   *
+   * const repoRestApi = new RestApi(CTX + '/users/', '?name={name}&team={team}')   // uri q var style
    * const repoRestApi = new RestApi(CTX + '/users/', 'name={name};team={team}')    // matrix var style
-   * const repoRestApi = new RestApi(CTX + '/users/', '{id}')                       // simple style
+   * const repoRestApi = new RestApi(CTX + '/users/', '{id}')                       // uri path var style
    * const repoRestApi = new RestApi(CTX + '/users/', params => CTX+'/users/'+params.id)  // set a func
-   * @param baseUrl
-   * @param soloUrlTemplate function or string
+   * </pre>
+   * @param pluralUrl {string}
+   * @param singularPart {function|string}, build a url made by primary key columns.
    */
-  constructor (baseUrl, soloUrlTemplate) {
-    this.baseUrl = baseUrl
-    if (typeof soloUrlTemplate === 'string') {
-      this.soloUrlBuilder = (params) => {
-        let u = baseUrl + (soloUrlTemplate || '')
+  constructor (pluralUrl, singularPart = '') {
+    this.pluralUrl = pluralUrl
+    if (typeof singularPart === 'string') {
+      this.singularUrlBuilder = (params) => {
+        let u = pluralUrl + (singularPart || '')
         if (params) {
           Object.keys(params).forEach(key => {
             u = u.replace('{' + key + '}', params[key])
           })
         }
-
         return u
       }
-    } else if (typeof soloUrlTemplate === 'function') {
-      this.soloUrlBuilder = soloUrlTemplate
+    } else if (typeof singularPart === 'function') {
+      this.singularUrlBuilder = singularPart
     } else {
-      throw new Error('RestApi has illegal soloUrlTemplate')
+      throw new Error('RestApi has illegal singularPartTemplate')
     }
   }
 
-  buildSoloUrl (params) {
-    return this.soloUrlBuilder(params)
-  }
-
-  buildQueryUrl (params) {
-    return Urls.buildQueryUrl(this.baseUrl, params)
+  getPluralUrlWithWithQParams (params) {
+    return Urls.appendQParams(this.pluralUrl, params)
   }
 
   /**
@@ -46,65 +51,65 @@ export default class RestApi {
    * @param failCallback
    */
   httpGetSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.buildQueryUrl(params)
-    fetch(finalUrl, {method: 'GET'}).then(resp => {
-      if (resp.ok) {
-        const count = resp.headers.get('X-Total-Count')
-        resp.json().then(data => okayCallback({items: data, totalCount: count}))
-      } else {
-        resp.json().then(failCallback)
-      }
-    })
+    const finalUrl = this.getPluralUrlWithWithQParams(params)
+    fetch(finalUrl, {method: 'GET'}).then(responding(okayCallback, failCallback))
   }
 
   httpGet (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.buildSoloUrl(params)
+    const finalUrl = this.singularUrlBuilder(params)
     fetch(finalUrl, {method: 'GET'}).then(responding(okayCallback, failCallback))
   }
 
   httpPost (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.baseUrl
+    const finalUrl = this.pluralUrl
     fetch(finalUrl, {
       method: 'POST',
       headers: DEFAULT_HEADERS,
-      body: JSON.stringify(params)
+      body: stringify(params)
     })
-      .then(responding2(okayCallback, failCallback))
+      .then(respondingAf(okayCallback, failCallback))
   }
 
   httpDelete (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.buildSoloUrl(params)
+    const finalUrl = this.singularUrlBuilder(params)
     fetch(finalUrl, {
       method: 'DELETE'
     })
-      .then(responding2(okayCallback, failCallback))
+      .then(respondingAf(okayCallback, failCallback))
   }
 
   httpDeleteSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.buildQueryUrl(params)
+    const finalUrl = this.getPluralUrlWithWithQParams(params)
     fetch(finalUrl, {
       method: 'DELETE'
     })
-      .then(responding2(okayCallback, failCallback))
+      .then(respondingAf(okayCallback, failCallback))
   }
 
+  /**
+   *
+   * @param oldParams body in PUT request
+   * @param newParams uri-q-params in PUT request
+   * @param okayCallback
+   * @param failCallback
+   */
   httpPut (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.buildSoloUrl(oldParams)
+    const finalUrl = this.singularUrlBuilder(oldParams)
     fetch(finalUrl, {
       method: 'PUT',
       headers: DEFAULT_HEADERS,
-      body: JSON.stringify(newParams)
+      body: stringify(newParams)
     })
-      .then(responding2(okayCallback, failCallback))
+      .then(respondingAf(okayCallback, failCallback))
   }
 
   httpPatch (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
-    const finalUrl = this.buildSoloUrl(oldParams)
+    const finalUrl = this.singularUrlBuilder(oldParams)
     fetch(finalUrl, {
       method: 'PATCH',
       headers: DEFAULT_HEADERS,
-      body: JSON.stringify(newParams)
+      body: stringify(newParams)
     })
-      .then(responding2(okayCallback, failCallback))
+      .then(respondingAf(okayCallback, failCallback))
   }
 }

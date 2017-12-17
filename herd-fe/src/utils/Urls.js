@@ -1,4 +1,10 @@
-const buildQueryUrl = function (urlStr, params) {
+/**
+ * appendQParams('xxx?a=2&b=3',{c=4}) === 'xxx?a=2&b=3&c=4'
+ * @param urlStr
+ * @param params
+ * @return {string}
+ */
+const appendQParams = function (urlStr, params) {
   var url = new URL(urlStr)
   if (params) {
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
@@ -10,4 +16,4 @@ const getCurrentUrlPathname = function () {
   // TODO maybe not right
   return window.location.pathname
 }
-export default {buildQueryUrl, getCurrentUrlPathname}
+export default {appendQParams, getCurrentUrlPathname}

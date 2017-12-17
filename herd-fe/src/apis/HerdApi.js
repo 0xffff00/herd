@@ -32,17 +32,17 @@ const countImageMediasByYear = ajaxList(CTX + '/imageMedias/countByYear')
 const countImageMediasByMonth = ajaxList(CTX + '/imageMedias/countByMonth')
 const repoRestApi = new RestApi(CTX + '/repos/', '{name}')
 
-let clear = (repoName, okayCallback, failCallback) => {
-  fetch(CTX + '/batch-sync/media-paths?repoName=' + repoName, {method: 'DELETE', headers: DEFAULT_HEADERS})
-    .then(responding(okayCallback, failCallback))
+let clear = (params, okayCallback, failCallback) => {
+  new RestApi(CTX + '/batch-sync/media-paths', '?repoName={repoName}')
+    .httpDelete(params, okayCallback, failCallback)
 }
-let sync = (repoName, okayCallback, failCallback) => {
-  fetch(CTX + '/batch-sync/media-paths?repoName=' + repoName, {method: 'PUT', headers: DEFAULT_HEADERS})
-    .then(responding(okayCallback, failCallback))
+let sync = (params, okayCallback, failCallback) => {
+  new RestApi(CTX + '/batch-sync/media-paths', '?repoName={repoName}')
+    .httpPut(params, null, okayCallback, failCallback)
 }
 let st2 = (okayCallback, failCallback) => {
-  fetch(CTX + '/batch-sync/media-paths/status/flatten', {method: 'GET', headers: DEFAULT_HEADERS})
-    .then(responding(okayCallback, failCallback))
+  new RestApi(CTX + '/batch-sync/media-paths/status/flatten')
+    .httpGet(null, okayCallback, failCallback)
 }
 const batchSync = {
   mediaPaths: {
