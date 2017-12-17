@@ -8,8 +8,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 
-import static party.threebody.herd.job.JobResult.FAILED;
-import static party.threebody.herd.job.JobResult.OK;
+import static party.threebody.herd.job.JobResult.*;
 
 /**
  * this class offers friendly log outputs and status changing logic.
@@ -54,16 +53,22 @@ public abstract class BasicLinarJob<C> implements LinarJob {
             throw new SkeanException("fail to start since BasicLinarJob[" + getName() + "] has been running.");
         }
         Collection<C> consumers = getStepConsumers();
+        if (consumers == null) {
+            throw new SkeanException("fail to start since Job[" + getName() + "]'s consumers not initialized.");
+        }
         status = new BasicJobStatus(consumers.size());
         status.setStartTime(LocalDateTime.now());
-        logger.info(" Job[{}] Started. {} steps included.", getName(), consumers.size());
+        logger.info("Job[{}] Started. {} steps included.", getName(), consumers.size());
         for (C item : consumers) {
-            startNextStep(item);
+            String result = startNextStep(item);
+            if (FATAL.equals(result)) {
+                break;
+            }
         }
         logger.info("Job[{}] Finished. {}", getName(), status.getResults());
     }
 
-    protected void startNextStep(C consumer) {
+    protected String startNextStep(C consumer) {
         String stepText = getStepText(consumer);
         int curr = status.next(stepText);
         LocalDateTime t1 = status.getCurrentStartTime();
@@ -80,11 +85,14 @@ public abstract class BasicLinarJob<C> implements LinarJob {
             long timeUsed = ChronoUnit.MILLIS.between(t1, t2);
             String s3 = String.format(". %d ms used.", timeUsed);
             logger.info(s1 + s2 + stepText + s3);
+            return result;
         } catch (Exception e) {
             status.as(FAILED);
             String s2 = String.format(" %7s ", FAILED);
             logger.warn(s1 + s2 + stepText, e);
+            return FAILED;
         }
+
     }
 
     @Override

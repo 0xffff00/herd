@@ -152,27 +152,43 @@ public class ComposedLinarJob implements LinarJob {
             return y1 + y2;
         }
 
+        private JobStatus getCurrentChild() {
+            int x = root.getCurrent() - 1;
+            if (x < 0 || x >= children.size()) {
+                return null;
+            }
+            return children.get(x);
+        }
+
         @Override
         public int getTotalSteps() {
             return totalSteps;
         }
 
-        @JsonIgnore
         @Override
         public String getCurrentMessage() {
-            return null;
+            if (getCurrentChild() == null) {
+                return null;
+            }
+            return getCurrentChild().getCurrentMessage();
         }
 
         @JsonIgnore
         @Override
         public LocalDateTime getStartTime() {
-            return null;
+            if (root == null) {
+                return null;
+            }
+            return root.getCurrentStartTime();
         }
 
         @JsonIgnore
         @Override
         public LocalDateTime getCurrentStartTime() {
-            return null;
+            if (getCurrentChild() == null) {
+                return null;
+            }
+            return getCurrentChild().getCurrentStartTime();
         }
 
     }

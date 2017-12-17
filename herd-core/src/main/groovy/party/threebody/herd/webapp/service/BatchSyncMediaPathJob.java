@@ -11,6 +11,7 @@ import party.threebody.herd.job.UnitaryJob;
 import party.threebody.herd.webapp.dao.MediaPathDao;
 import party.threebody.herd.webapp.domain.MediaPath;
 import party.threebody.herd.webapp.domain.Repo;
+import party.threebody.skean.web.SkeanNotFoundException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,7 +39,10 @@ public class BatchSyncMediaPathJob extends MonoBatchSyncJob {
         this.mediaPathDao = mediaPathDao;
     }
 
-    public void reset(Repo repo){
+    public void reset(Repo repo) {
+        if (repo == null) {
+            throw new SkeanNotFoundException("repo missing");
+        }
         this.repo = repo;
         setChildren(
                 new UnitaryJob() {
@@ -63,8 +67,6 @@ public class BatchSyncMediaPathJob extends MonoBatchSyncJob {
                 new DeleteDeadMediaPathJob()
         );
     }
-
-
 
 
     /**
