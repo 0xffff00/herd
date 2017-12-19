@@ -4,27 +4,7 @@
               :querier="querier">
       <div slot="criteria-pane">
         <div>
-          <p>
-            <Button type="warning" @click="mp_clear('CUsershzkPictures')">mp_clear</Button>
-            <Button type="warning" @click="mp_sync('CUsershzkPictures')">mp_sync</Button>
-          </p>
-          <br>
-          <p>
-            <Button type="warning" @click="actOnRepos('sync')">同步仓库</Button>
-            <Button type="warning" @click="actOnRepos('sync.path')">同步Path</Button>
-            <Button type="warning" @click="actOnRepos('sync.info.brief')">同步简要信息</Button>
-            <Button type="warning" @click="actOnRepos('sync.info.senior')">同步高级信息</Button>
-          </p>
-          <p>
-            <Button type="error" @click="actOnRepos('clear')">清空仓库</Button>
-            <Button type="error" @click="actOnRepos('clear.path')">清空Path</Button>
-            <Button type="error" @click="actOnRepos('clear.info.brief')">清空简要信息</Button>
-            <Button type="error" @click="actOnRepos('clear.info.senior')">清空高级信息</Button>
 
-          </p>
-          <p>
-            <Button type="warning" @click="actOnRepos('convert2jpg.1Kq5')">jpg批量压缩</Button>
-          </p>
           <!--<el-form :inline="true" :model="querier">-->
           <!--<el-form-item label="词语">-->
           <!--<el-input v-model="querier.criteria[0].value" placeholder="词语"></el-input>-->
@@ -68,24 +48,19 @@
   import Arrays from '../utils/Arrays'
   import TableMan from '../components/TableMan'
 
-  function loopExec (maxTurns, interval, cond, func) {
-    for (var i = 0; i < maxTurns && cond(); i++) {
-      setTimeout(func, i * interval)
-    }
-  }
-
-  function startLoop (func, interval = 500, timeout = 60000) {
-    loop = setInterval(func, interval)
+  function startLoop (func, interval = 500, timeout = 60000 * 15) {
+    let res = setInterval(func, interval)
+    console.log(`starting loop[${res}]...`)
     setTimeout(() => {
-      clearInterval(loop)
+      clearInterval(res)
     }, timeout)
+    return res
   }
 
-  function stopLoop () {
-    clearInterval(loop)
+  function stopLoop (loopId) {
+    console.log(`stopping loop[${loopId}]...`)
+    clearInterval(loopId)
   }
-
-  let loop = null
 
   export default {
     name: 'repo-man',
@@ -94,12 +69,19 @@
         sync: {
           ui: {
             title: null,
-            informing: false
+            informing: false,
+            loopId: null
           },
           running: false,
           current: 0,
           totalSteps: 0,
-          currentMessage: null
+          currentMessage: null,
+          thumbnail: {
+            running: false,
+            current: 0,
+            totalSteps: 0,
+            currentMessage: null
+          }
         },
         data: {
           result: {
@@ -123,7 +105,7 @@
           criteria: []
         },
         model: {
-          api: herdApi.repoRestApi,
+          api: herdApi.mediaRepos,
           name: '仓库',
           columnDefault: {
             required: false,
@@ -138,7 +120,7 @@
               sortable: true
             },
             {
-              key: 'absPath',
+              key: 'path',
               title: '绝对路径',
               sortable: true
             },
@@ -154,8 +136,8 @@
               sk2actions: [
                 'edit',
                 'delete',
-                {actionName: '同步文件路径', actionFunc: this.mmp},
-                {actionName: '清空文件路径', actionFunc: this.mp_clear}
+                {actionName: '同步', actionFunc: this.startBatchSyncByRepo},
+                {actionName: '清空', actionFunc: this.clearSyncByRepo}
               ]
             }
           ]
@@ -182,41 +164,33 @@
       }
     },
     methods: {
-      mp_clear (repo) {
-        herdApi.batchSync.mediaPaths.clear({repoName: repo.name}, this.notifyAffectOk('c'), this.notifyFail('c'))
-      },
-      mmp (repo) {
+      startBatchSyncByRepo (repo) {
         let self = this
-        herdApi.batchSync.mediaPaths.sync({repoName: repo.name}, () => {}, this.notifyFail('s'))
+        herdApi.jobs.batchSync.start({repoName: repo.name}, () => {}, this.notifyFail('s'))
         self.sync.current = 0
         self.sync.running = true
         self.sync.ui.title = '正在同步...'
-        startLoop(() => {
-          herdApi.batchSync.mediaPaths.st2(d => {
-            console.log(d.data)
+        self.sync.ui.loopId = startLoop(() => {
+          herdApi.jobs.batchSync.status(d => {
             self.sync.running = d.data.running
             self.sync.current = d.data.current
             self.sync.totalSteps = d.data.totalSteps
             self.sync.currentMessage = d.data.currentMessage
             if (!self.sync.running) {
-              stopLoop()
+              stopLoop(self.sync.ui.loopId)
               self.sync.ui.informing = true
               self.sync.ui.title = '同步结束'
               self.sync.current = self.sync.totalSteps
             }
-          }, self.notifyFail)
+          }, () => {
+            stopLoop(self.sync.ui.loopId)
+          })
         })
-      },
-      mp_st2 () {
-        herdApi.batchSync.mediaPaths.st2({}, this.notifyAffectOk, this.notifyFail)
-      },
-      actOnRepos (action) {
-        herdApi.ajaxActOnRepo(action)(null, this.notifyAffectOk(action), this.notifyFail(action))
       },
       notifyAffectOk (actionName) {
         const self = this
         return d => {
-          console.log(d)
+          // console.log(d)
           let msg = ''
           if (d.data && d.data.counts) {
             msg = d.data.summary

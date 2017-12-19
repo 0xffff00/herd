@@ -1,6 +1,6 @@
 import RestApi from '../utils/RestApi'
 import appConf from '../../config/sk2/app-conf'
-import { responding, responding2, CB_NO_OP, DEFAULT_HEADERS } from '../utils/RestUtils'
+import { responding, respondingAf, CB_NO_OP, DEFAULT_HEADERS } from '../utils/RestUtils'
 
 const CTX = appConf.apis.dict.url
 
@@ -15,7 +15,7 @@ x1Relations.batchCreate = function (params, okayCallback = CB_NO_OP, failCallbac
     headers: DEFAULT_HEADERS,
     body: JSON.stringify(params)
   })
-    .then(responding2(okayCallback, failCallback))
+    .then(respondingAf(okayCallback, failCallback))
 }
 export default {words, basicRelations, x1Relations}
 

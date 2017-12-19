@@ -6,80 +6,45 @@ import appConf from '../../config/sk2/app-conf'
 const CTX = appConf.apis.herd.url
 
 const ajaxList = url => (params, callback) => {
-  let realUrl = Urls.buildQueryUrl(url, params)
+  let realUrl = Urls.appendQParams(url, params)
   fetch(realUrl).then(r => r.json()).then(callback)
-}
-const ajaxActOnRepo = action => (params, okayCallback, failCallback) => {
-  params = params || {}
-  params['action'] = action
-  const finalUrl = Urls.buildQueryUrl(`${CTX}/advanced/v1`, params)
-  fetch(finalUrl, {
-    method: 'POST',
-    headers: DEFAULT_HEADERS,
-    body: null
-  })
-    .then(responding(okayCallback, failCallback))
 }
 
 const getUrlByHash = function (hash, cacheCategory) {
   return CTX + '/file/' + hash + '.jpg?cache=' + cacheCategory
 }
 
-const listRepos = ajaxList(CTX + '/repos')
-const listMedias = ajaxList(CTX + '/medias')
-const listImageMedias = ajaxList(CTX + '/imageMedias')
-const countImageMediasByYear = ajaxList(CTX + '/imageMedias/countByYear')
-const countImageMediasByMonth = ajaxList(CTX + '/imageMedias/countByMonth')
-const repoRestApi = new RestApi(CTX + '/repos/', '{name}')
+const mediaRepos = new RestApi(CTX + '/media-repos/', '{name}')
+const mediaFiles = new RestApi(CTX + '/media-files/', '{path}')
+const imageInfos = new RestApi(CTX + '/image-infos/', '{hash}')
+// const listRepos = ajaxList(CTX + '/repos')
+// const listMedias = ajaxList(CTX + '/medias')
+// const listImageMedias = ajaxList(CTX + '/image-infos')
+imageInfos.countByYear = ajaxList(CTX + '/image-infos/countByYear')
+imageInfos.countByMonth = ajaxList(CTX + '/image-infos/countByMonth')
+imageInfos.countByDate = ajaxList(CTX + '/image-infos/countByDate')
 
-let clear = (params, okayCallback, failCallback) => {
-  new RestApi(CTX + '/batch-sync/media-paths', '?repoName={repoName}')
-    .httpDelete(params, okayCallback, failCallback)
+const jobs = {
+  batchSync: {},
+  thumbnail: {}
 }
-let sync = (params, okayCallback, failCallback) => {
-  new RestApi(CTX + '/batch-sync/media-paths', '?repoName={repoName}')
+jobs.batchSync.start = (params, okayCallback, failCallback) => {
+  new RestApi(CTX + '/jobs/batch-sync', '?repoName={repoName}')
     .httpPut(params, null, okayCallback, failCallback)
 }
-let st2 = (okayCallback, failCallback) => {
-  new RestApi(CTX + '/batch-sync/media-paths/status/flatten')
+jobs.batchSync.status = (okayCallback, failCallback) => {
+  new RestApi(CTX + '/jobs/batch-sync/status')
     .httpGet(null, okayCallback, failCallback)
 }
-const batchSync = {
-  mediaPaths: {
-    clear: clear,
-    sync: sync,
-    st2: st2
-  }
-
+jobs.thumbnail.status = (okayCallback, failCallback) => {
+  new RestApi(CTX + '/jobs/image/thumbnails/status')
+    .httpGet(null, okayCallback, failCallback)
 }
-// const repoSync = ajaxActOnRepo('sync')
-// const repoSyncPath = ajaxActOnRepo('sync.path')
-// const repoSyncInfoBrief = ajaxActOnRepo('sync.info.brief')
-// const repoSyncInfoSenior = ajaxActOnRepo('sync.info.senior')
-// const repoClear = ajaxActOnRepo('clear')
-// const repoClearPath = ajaxActOnRepo('clear.path')
-// const repoClearInfoBrief = ajaxActOnRepo('clear.info.brief')
-// const repoClearInfoSenior = ajaxActOnRepo('clear.info.senior')
-// const convert2jpg1Kq5 = ajaxActOnRepo('convert2jpg.1Kq5')
-// const convert2jpg2Kq7 = ajaxActOnRepo('convert2jpg.2Kq7')
 
 export default {
-  listRepos,
-  listMedias,
-  listImageMedias,
   getUrlByHash,
-  countImageMediasByYear,
-  countImageMediasByMonth,
-  repoRestApi,
-  ajaxActOnRepo,
-  batchSync
-  // repoSync,
-  // repoSyncPath,
-  // repoSyncInfoBrief,
-  // repoSyncInfoSenior,
-  // repoClear,
-  // repoClearPath,
-  // repoClearInfoBrief,
-  // repoClearInfoSenior,
-  // convert2jpg1Kq5
+  mediaFiles,
+  imageInfos,
+  mediaRepos,
+  jobs
 }
