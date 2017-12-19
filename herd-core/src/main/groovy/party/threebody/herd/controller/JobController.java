@@ -19,8 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @RestController
-@RequestMapping("batch-sync")
-public class BatchSyncController {
+@RequestMapping("jobs")
+public class JobController {
     @Autowired HerdService herdService;
     @Autowired BatchSyncService batchSyncService;
     @Autowired MediaFileDao mediaFileDao;
@@ -31,24 +31,27 @@ public class BatchSyncController {
 
     @Async
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @PutMapping("media")
-    public void startBatchSyncMediaPathJob(@RequestParam String repoName) {
+    @PutMapping("batch-sync")
+    public void startBatchSyncJob(@RequestParam String repoName) {
         Path rootDirPath = getRepoRootDirPath(repoName);
         batchSyncJob.prepare(rootDirPath);
         batchSyncJob.start();
     }
 
-    @GetMapping("media/status/all")
-    public ComposedLinarJob.JobStatusVO getBatchSyncMediaPathJobAllStatus() {
+    @GetMapping("batch-sync/status/all")
+    public ComposedLinarJob.JobStatusVO getBatchSyncJobAllStatus() {
         return batchSyncJob.getAllStatus();
     }
 
-    @GetMapping("media/status")
-    public JobStatus getBatchSyncMediaPathJobStatus() {
+    @GetMapping("batch-sync/status")
+    public JobStatus getBatchSyncJobStatus() {
         return batchSyncJob.getStatus();
     }
 
-
+    @GetMapping("image/thumbnails/status")
+    public JobStatus getImageThumbnailsStatus1() {
+        return makeImageThumbnailsJob.getStatus();
+    }
 
     private Path getRepoRootDirPath(String repoName){
         MediaRepo mediaRepo = mediaRepoDao.readOne(repoName);

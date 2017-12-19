@@ -32,7 +32,7 @@ public class ComposedLinarJob implements LinarJob {
             return null;
         }
         int x = rootStatus.getCurrent() - 1;
-        if (x < 0 || x >= children.size()) {
+        if (x < 0 || x >= getChildren().size()) {
             return null;
         }
         return children.get(x);
@@ -119,30 +119,31 @@ public class ComposedLinarJob implements LinarJob {
     }
 
     public static class FlattenJobStatus implements JobStatus {
-        private int totalSteps;
         private JobStatus root;
-        private List<JobStatus> children;
+        private List<? extends LinarJob> jobs;
 
-        public FlattenJobStatus(JobStatus root, List<? extends LinarJob> jobs) {
-            this.root = root;
-            this.children = jobs.stream()
+        private List<JobStatus> getChildren() {
+            return jobs.stream()
                     .map(LinarJob::getStatus)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-            this.totalSteps = this.children.stream()
-                    .mapToInt(JobStatus::getTotalSteps)
-                    .sum();
         }
 
+        public FlattenJobStatus(JobStatus root, List<? extends LinarJob> jobs) {
+            this.root = root;
+            this.jobs = jobs;
+        }
+
+        @Override
         public Map<String, Integer> getResults() {
             int x = root.getCurrent();
             if (x <= 0) {
                 return null;
             }
-            if (x >= children.size()) {
-                x = children.size() - 1;
+            if (x >= getChildren().size()) {
+                x = getChildren().size() - 1;
             }
-            return mergeResultMaps(children.subList(0, x).stream()
+            return mergeResultMaps(getChildren().subList(0, x).stream()
                     .map(JobStatus::getResults));
         }
 
@@ -168,30 +169,35 @@ public class ComposedLinarJob implements LinarJob {
             if (x <= 0) {
                 return 0;
             }
-            if (x > children.size()) {
-                return children.stream()
+            if (x > getChildren().size()) {
+                return getChildren().stream()
                         .mapToInt(JobStatus::getTotalSteps)
                         .sum() + 1;
             }
-            int y1 = children.subList(0, x - 1).stream()
+            int y1 = getChildren().subList(0, x - 1).stream()
                     .mapToInt(JobStatus::getTotalSteps)
                     .sum();
-            int y2 = children.get(x - 1).getCurrent();
+            int y2 = getChildren().get(x - 1).getCurrent();
             return y1 + y2;
-        }
-
-        private JobStatus getCurrentChild() {
-            int x = root.getCurrent() - 1;
-            if (x < 0 || x >= children.size()) {
-                return null;
-            }
-            return children.get(x);
         }
 
         @Override
         public int getTotalSteps() {
-            return totalSteps;
+            return jobs.stream()
+                    .map(LinarJob::getStatus)
+                    .filter(Objects::nonNull)
+                    .mapToInt(JobStatus::getTotalSteps)
+                    .sum();
         }
+
+        private JobStatus getCurrentChild() {
+            int x = root.getCurrent() - 1;
+            if (x < 0 || x >= getChildren().size()) {
+                return null;
+            }
+            return getChildren().get(x);
+        }
+
 
         @Override
         public String getCurrentMessage() {

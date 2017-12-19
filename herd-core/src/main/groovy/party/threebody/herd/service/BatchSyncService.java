@@ -14,7 +14,7 @@ import party.threebody.skean.web.SkeanConflictException;
 public class BatchSyncService {
     @Autowired MetaDao metaDao;
 
-    @Value("herd.localThumbnailRepoPath")
+    @Value("${herd.localThumbnailRepoPath}")
     String localThumbnailRepoPath;
 
     public String getLocalThumbnailRepoPath() {

@@ -49,7 +49,7 @@ public class ParseMediaFilesJob extends BasicLinarJob<Path> {
             return SKIPPED;
         }
 
-        if (mf.getMimeType().startsWith("image")) {
+        if (mf.getMimeType()!=null && mf.getMimeType().startsWith("image")) {
             InputStream inputStream = Files.newInputStream(Paths.get(mf.getPath()));
             imageInfo = ImageMetaUtils.parseExifInfo(inputStream);
             imageInfo.setHash(hash);

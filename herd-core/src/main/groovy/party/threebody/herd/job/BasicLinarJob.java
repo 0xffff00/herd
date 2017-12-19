@@ -65,6 +65,7 @@ public abstract class BasicLinarJob<C> implements LinarJob {
                 break;
             }
         }
+        status.next(getName() + " has been finished.");
         logger.info("Job[{}] Finished. {}", getName(), status.getResults());
     }
 
