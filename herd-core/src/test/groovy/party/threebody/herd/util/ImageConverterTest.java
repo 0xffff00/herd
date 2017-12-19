@@ -1,7 +1,6 @@
 package party.threebody.herd.util;
 
 import org.junit.Test;
-import party.threebody.herd.webapp.util.ImageConverter;
 
 public class ImageConverterTest {
     @Test

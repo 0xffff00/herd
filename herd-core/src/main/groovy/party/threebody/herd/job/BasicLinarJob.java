@@ -34,7 +34,7 @@ public abstract class BasicLinarJob<C> implements LinarJob {
      * tell how to take a step. any Exception will check of this step as FAILED
      *
      * @param consumer
-     * @return JobResult string, such as FAILED, OK
+     * @return JobResult string, such as FAILED, OK; regards null as OK
      * @throws Exception
      */
     protected abstract String takeStep(C consumer) throws Exception;
@@ -73,7 +73,7 @@ public abstract class BasicLinarJob<C> implements LinarJob {
         int curr = status.next(stepText);
         LocalDateTime t1 = status.getCurrentStartTime();
         int total = status.getTotalSteps();
-        String s1 = String.format("[%3d/%3d]", curr, total);
+        String s1 = String.format(getS1Format(total), curr, total);
         try {
             String result = takeStep(consumer);
             if (result == null) {
@@ -108,5 +108,15 @@ public abstract class BasicLinarJob<C> implements LinarJob {
 
     public void setStatus(BasicJobStatus jobStatus) {
         this.status = jobStatus;
+    }
+
+    private static String getS1Format(int total) {
+        int nDigit = countDigits(total);
+        String s = nDigit > 0 ? String.valueOf(nDigit) : "";
+        return "[%" + s + "d/%" + s + "d]";
+    }
+
+    private static int countDigits(int num) {
+        return (int) Math.floor(Math.log10(Math.abs(num))) + 1;
     }
 }

@@ -1,6 +1,6 @@
 package tmp.learning;
 
-import party.threebody.herd.webapp.domain.ImageMedia;
+import party.threebody.herd.domain.ImageInfo;
 import party.threebody.skean.lang.Beans;
 
 import java.beans.BeanInfo;
@@ -32,8 +32,8 @@ public class LearnBeanReflect {
         System.out.println(int.class.equals(Integer.class));
 
 
-        ImageMedia imageMedia = new ImageMedia();
-        System.out.println(Beans.convertBeanToSimpleMap(imageMedia));
+        ImageInfo imageInfo = new ImageInfo();
+        System.out.println(Beans.convertBeanToSimpleMap(imageInfo));
 
     }
 

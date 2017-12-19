@@ -5,10 +5,9 @@ import party.threebody.skean.misc.SkeanException;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * a LinarJob composed by child LinarJobs
@@ -98,6 +97,7 @@ public class ComposedLinarJob implements LinarJob {
         private JobStatus root;
         private JobStatus flatten;
         private JobStatus child;
+        private Map<String, Integer> flattenResults;
 
         public JobStatusVO(JobStatus root, JobStatus flatten, JobStatus child) {
             this.root = root;
@@ -132,6 +132,34 @@ public class ComposedLinarJob implements LinarJob {
             this.totalSteps = this.children.stream()
                     .mapToInt(JobStatus::getTotalSteps)
                     .sum();
+        }
+
+        public Map<String, Integer> getResults() {
+            int x = root.getCurrent();
+            if (x <= 0) {
+                return null;
+            }
+            if (x >= children.size()) {
+                x = children.size() - 1;
+            }
+            return mergeResultMaps(children.subList(0, x).stream()
+                    .map(JobStatus::getResults));
+        }
+
+        private static Map<String, Integer> mergeResultMaps(Stream<Map<String, Integer>> maps) {
+            Map<String, Integer> res = new HashMap<>();
+            maps.forEach(map -> {
+                for (String k : map.keySet()) {
+                    Integer v0 = res.get(k);
+                    Integer v = map.get(k);
+                    if (v0 == null) {
+                        res.put(k, v);
+                    } else {
+                        res.put(k, v0 + v);
+                    }
+                }
+            });
+            return res;
         }
 
         @Override

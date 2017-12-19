@@ -8,8 +8,8 @@ import com.drew.metadata.Tag;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.resizers.configurations.ScalingMode;
 import org.apache.commons.lang.math.NumberUtils;
-import party.threebody.herd.webapp.domain.ImageMedia;
-import party.threebody.herd.webapp.util.ImageMetaUtils;
+import party.threebody.herd.domain.ImageInfo;
+import party.threebody.herd.util.ImageMetaUtils;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -38,9 +38,9 @@ public class LearnImageIO {
                         System.out.println(p);
 
                         try {
-                            ImageMedia imageMedia = ImageMetaUtils.parseExifInfo(p);
-                            int w = imageMedia.getWidth();
-                            int h = imageMedia.getHeight();
+                            ImageInfo imageInfo = ImageMetaUtils.parseExifInfo(p);
+                            int w = imageInfo.getWidth();
+                            int h = imageInfo.getHeight();
                             int maxw=4000;
                             int maxh=maxw*3/4;
                             double q = 0.6;
@@ -61,9 +61,9 @@ public class LearnImageIO {
                     .sorted((x,y)->x.getFileName().compareTo(y.getFileName()))
                     .forEach(p -> {
                         try {
-                            ImageMedia imageMedia = ImageMetaUtils.parseExifInfo(p);
-                            int w = imageMedia.getWidth();
-                            int h = imageMedia.getHeight();
+                            ImageInfo imageInfo = ImageMetaUtils.parseExifInfo(p);
+                            int w = imageInfo.getWidth();
+                            int h = imageInfo.getHeight();
                             long fsize = Files.size(p);
                             double density = fsize * 100 / (double) (w * h);
                             System.out.printf("den=%06.4f %s\n", density, p.toString());

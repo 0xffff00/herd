@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class BasicJobStatus implements JobStatus {
 
@@ -102,11 +103,15 @@ public class BasicJobStatus implements JobStatus {
 
 
     /**
-     * resultTag -> count
-     * @return
+     * @return resultTag -> count
      */
-    public Map<String, AtomicInteger> getResults() {
-        return results;
+    @Override
+    public Map<String, Integer> getResults() {
+        return results.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().get()
+                ));
     }
 
     public void setResults(Map<String, AtomicInteger> results) {

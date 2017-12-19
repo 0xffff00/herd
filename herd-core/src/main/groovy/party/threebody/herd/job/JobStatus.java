@@ -1,6 +1,7 @@
 package party.threebody.herd.job;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public interface JobStatus {
 
@@ -22,6 +23,8 @@ public interface JobStatus {
     LocalDateTime getStartTime();
 
     LocalDateTime getCurrentStartTime();
+
+    Map<String, Integer> getResults();
 
 
 }
