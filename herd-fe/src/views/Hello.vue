@@ -1,14 +1,7 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-      <li><a href="http://vuejs-templates.github.io/webpack/" target="_blank">Docs for This Template</a></li>
-    </ul>
+    <i-button>aaaa</i-button>
     <h2>CONFIG</h2>
     <table>
       <tr>
@@ -51,10 +44,19 @@
       }
     },
     created () {
-      let now = moment()
-      for (var i = 0; i < 100; i++) {
-        let d = now.add(i, 'd').format('YYYY-MM-DD')
-        let v = Math.max(0, (Math.random() * 11 - 5).toFixed())
+      for (let i = 0; i < 100; i++) {
+        let d = moment().add(i - 100, 'd').format('YYYY-MM-DD')
+        this.demo.countsByDate.push({date: d, cnt: i - 5})
+      }
+      for (let i = 0; i < 800; i++) {
+        let d = moment().add(i, 'd').format('YYYY-MM-DD')
+        let p = Math.random()
+        let v = 0
+        if (p > 0.9) {
+          v = (Math.random() * 70).toFixed() + 20
+        } else if (p > 0.3) {
+          v = (Math.random() * 16).toFixed()
+        }
         this.demo.countsByDate.push({date: d, cnt: v})
       }
     },
