@@ -1,14 +1,16 @@
 <template>
   <div class="time-grid">
-    {{s3}}
-    <table class="month-bar" :style="saa">
-      <tr>
-        <td></td>
+    <table class="month-bar">
+      <tr v-for="month in involvedMonths">
+        <td :style="cssOfMonthBlock(month)">
+          <span v-if="month.endsWith('01')" class="year">{{month.slice(0, 4)}}</span>
+          <span v-else class="month">{{month.slice(5, 7)}}</span>
+        </td>
       </tr>
     </table>
     <table class="week-bar">
       <tr v-for="y1 in involvedWeeksCount">
-        <td v-for="x1 in 7" :style="getStyle(x1 - 1, y1 - 1)">
+        <td v-for="x1 in 7" :style="cssOfDateBlock(x1 - 1, y1 - 1)">
           <a :title="getItem(x1 - 1, y1 - 1).date+'('+getItem(x1 - 1, y1 - 1).cnt+')'">
           </a>
         </td>
@@ -42,9 +44,14 @@
       saa () {
         return `height:${this.involvedWeeksCount * 18}px;`
       },
-      s3 () {
-        let m1 = _.mapValues(_.groupBy(this.data, x => x.date.slice(0, 7)), x => x.length)
-        console.log(m1)
+      countMapByMonth () {
+        return _.mapValues(_.groupBy(this.data, x => x.date.slice(0, 7)), x => x.length)
+      },
+      involvedMonths () {
+        return _.keys(this.countMapByMonth)
+      },
+      involvedMonthsCount () {
+        return this.countMapByMonth.length
       }
     },
     mounted () {
@@ -63,10 +70,17 @@
         let idx = this.getIdx(x, y)
         return idx < 0 ? {} : this.data[idx]
       },
-      getStyle (x, y) {
+      cssOfDateBlock (x, y) {
         let v = this.getItem(x, y).cnt
         let c = J_1_9_GREEN(v)
         return `background: rgb(${c.r},${c.g},${c.b});`
+      },
+      cssOfMonthBlock (month) {
+        let cnt = this.countMapByMonth[month]
+        let h = cnt / 7 * 18
+        let monNo = parseInt(month.slice(5, 7))
+        let bgc = monNo % 2 ? '#efe' : '#dfd'
+        return `height:${h}px;background:${bgc}`
       }
     }
   }
@@ -94,8 +108,7 @@
       k = (x - 1) / (p - 1)
       return midRgb(C1, Cp, k)
     } else {
-      k = (Math.log2(x - 1) - Math.log2(p - 1)) / (Math.log2(q - 1) - Math.log2(x - 1))
-      console.log(x, k)
+      k = (Math.log2(x - 1) - Math.log2(p - 1)) / (Math.log2(q - 1) - Math.log2(p - 1))
       return midRgb(Cp, Cq, k)
     }
   }
@@ -116,13 +129,21 @@
   table.month-bar {
     float: left;
     width: 30px;
-    height: 100%;
     border-spacing: 0px;
-    background: blanchedalmond;
   }
 
   table.month-bar td {
+    padding-bottom: 1px;
+    background: blanchedalmond;
+  }
 
+  table.month-bar td .year {
+    color: dimgray;
+    font-size: 18px;
+  }
+
+  table.month-bar td .month {
+    color: gray;
   }
 
   table.week-bar {
