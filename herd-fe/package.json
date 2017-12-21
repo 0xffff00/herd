@@ -19,7 +19,7 @@
     "font-awesome": "^4.7.0",
     "iview": "^2.7.4",
     "moment": "^2.20.0",
-    "vue": "^2.5.13",
+    "vue": "^2.5.9",
     "vue-router": "^2.8.1"
   },
   "devDependencies": {
@@ -86,7 +86,7 @@
     "url-template": "^2.0.8",
     "vue-loader": "^13.0.4",
     "vue-style-loader": "^3.0.1",
-    "vue-template-compiler": "^2.4.2",
+    "vue-template-compiler": "^2.5.9",
     "webpack": "^2.6.1",
     "webpack-bundle-analyzer": "^2.2.1",
     "webpack-dev-middleware": "^1.10.0",

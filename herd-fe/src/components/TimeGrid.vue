@@ -10,7 +10,7 @@
     </table>
     <table class="week-bar">
       <tr v-for="y1 in involvedWeeksCount">
-        <td v-for="x1 in 7" :style="cssOfDateBlock(x1 - 1, y1 - 1)">
+        <td v-for="x1 in 7" :style="cssOfDateBlock(x1 - 1, y1 - 1)" :class="[cssOfBorder(x1-1,y1-1)]">
           <a :title="getItem(x1 - 1, y1 - 1).date+'('+getItem(x1 - 1, y1 - 1).cnt+')'">
           </a>
         </td>
@@ -22,8 +22,15 @@
   import _ from 'lodash'
   import moment from 'moment'
 
+  /**
+   * code conventions:
+   * x: which day of week , 0 - Monday, 7 - Sunday
+   * y: which week of TimeGrid
+   * idx: the index of vue.data
+   *
+   */
   export default {
-    name: 'TimeGrid-v1',
+    name: 'TimeGrid',
     data () {
       return {
         aaa: 1
@@ -52,6 +59,17 @@
       },
       involvedMonthsCount () {
         return this.countMapByMonth.length
+      },
+      xOf1stDateInEachMonth () { // y -> x of 1st date in month
+        let res = new Array(this.involvedWeeksCount).fill(-1)
+        for (let k = 0; k < this.data.length; k++) {
+          let d = this.data[k]
+          if (d.date.endsWith('01')) {
+            let co = this.coord(k)
+            res[co.y] = co.x
+          }
+        }
+        return res
       }
     },
     mounted () {
@@ -59,7 +77,17 @@
     },
 
     methods: {
-      getIdx (x, y) {
+      /**
+       * 76 -> {x：6,y:10}
+       */
+      coord (idx) {
+        let k = this.offsetInFirstWeek + idx
+        return {x: k % 7, y: parseInt(k / 7)}
+      },
+      /**
+       * （6，10) -> 76
+       */
+      idx (x, y) {
         let idx = x + y * 7 - this.offsetInFirstWeek
         if (idx < 0 || idx >= this.data.length) {
           return -1
@@ -67,8 +95,18 @@
         return idx
       },
       getItem (x, y) {
-        let idx = this.getIdx(x, y)
+        let idx = this.idx(x, y)
         return idx < 0 ? {} : this.data[idx]
+      },
+
+      cssOfBorder (x, y) {
+        let e = this.xOf1stDateInEachMonth[y]
+        let res = ''
+        if (e !== -1) {
+          res = (x >= e) ? 'mon-up' : 'mon-dn'
+          if (x === e && e !== 0) res += ' mon-lt'
+        }
+        return res
       },
       cssOfDateBlock (x, y) {
         let v = this.getItem(x, y).cnt
@@ -129,7 +167,7 @@
   table.month-bar {
     float: left;
     width: 30px;
-    border-spacing: 0px;
+    border-spacing: 0;
   }
 
   table.month-bar td {
@@ -162,6 +200,18 @@
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  .mon-dn {
+    border-bottom: dotted 1px red;
+  }
+
+  .mon-up {
+    border-top: dotted 1px red;
+  }
+
+  .mon-lt {
+    border-left: dotted 1px red;
   }
 
 </style>
