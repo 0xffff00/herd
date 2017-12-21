@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import party.threebody.herd.dao.MediaFileDao;
 import party.threebody.herd.domain.MediaFile;
 import party.threebody.herd.job.BasicLinarJob;
-import party.threebody.herd.util.HerdFileUtils;
+import party.threebody.herd.util.HerdFiles;
 import party.threebody.herd.util.ImageConverter;
 import party.threebody.herd.util.MediaType;
 import party.threebody.herd.util.MediaTypeUtils;
@@ -48,7 +48,7 @@ public class MakeImageThumbnailsJob extends BasicLinarJob<Path> {
         this.srcDirPath = srcDirPath;
         String localThumbnailRepoPath = batchSyncService.getLocalThumbnailRepoPath();
         destDirPath = Paths.get(localThumbnailRepoPath, converter.getName());
-        HerdFileUtils.makeSureDirectoryExists(destDirPath);
+        HerdFiles.makeSureDirectoryExists(destDirPath);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class MakeImageThumbnailsJob extends BasicLinarJob<Path> {
 
     @Override
     public Collection<Path> getStepConsumers() {
-        return HerdFileUtils.listAllFilesDeeply(srcDirPath);
+        return HerdFiles.listAllFilesDeeply(srcDirPath);
     }
 
     @Override

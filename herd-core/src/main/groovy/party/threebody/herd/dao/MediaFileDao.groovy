@@ -27,7 +27,7 @@ class MediaFileDao extends LegacySinglePKJpaCrudDAO<MediaFile, String> {
 
 
     List<MediaFile> listByPathPrefix(String pathPrefix) {
-        def sql = "SELECT * FROM $table WHERE path LIKE ? ESCAPE '='"
+        def sql = "SELECT * FROM $table WHERE path LIKE ?"
         cjt.sql(sql).arg(pathPrefix + '%').list(MediaFile.class)
     }
 
@@ -36,7 +36,7 @@ class MediaFileDao extends LegacySinglePKJpaCrudDAO<MediaFile, String> {
 //    }
 
     int deleteSomeByPathPrefix(String pathPrefix) {
-        def sql = "DELETE FROM $table WHERE path LIKE ? ESCAPE '='"
+        def sql = "DELETE FROM $table WHERE path LIKE ?"
         cjt.sql(sql).arg(pathPrefix + '%').execute()
     }
 

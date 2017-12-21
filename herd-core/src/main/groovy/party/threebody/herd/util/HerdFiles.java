@@ -8,8 +8,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class HerdFileUtils {
-    private HerdFileUtils() {
+public class HerdFiles {
+    private HerdFiles() {
     }
 
     public static void makeSureDirectoryExists(Path dirPath) {
@@ -30,6 +30,10 @@ public class HerdFileUtils {
         } catch (IOException e) {
             throw new SkeanException("fail to visit: " + rootDirPath, e);
         }
+    }
+
+    public static String toString(Path path){
+        return path.toString().replaceAll("\\\\","/");
     }
 
 

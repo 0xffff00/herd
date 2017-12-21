@@ -7,7 +7,7 @@ import party.threebody.herd.dao.MediaFileDao;
 import party.threebody.herd.domain.ImageInfo;
 import party.threebody.herd.domain.MediaFile;
 import party.threebody.herd.job.BasicLinarJob;
-import party.threebody.herd.util.HerdFileUtils;
+import party.threebody.herd.util.HerdFiles;
 import party.threebody.herd.util.ImageMetaUtils;
 
 import java.io.InputStream;
@@ -34,7 +34,7 @@ public class ParseMediaFilesJob extends BasicLinarJob<Path> {
 
     @Override
     public Collection<Path> getStepConsumers() {
-        return HerdFileUtils.listAllFilesDeeply(rootDirPath);
+        return HerdFiles.listAllFilesDeeply(rootDirPath);
     }
 
     @Override

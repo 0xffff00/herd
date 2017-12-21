@@ -10,7 +10,7 @@ import party.threebody.herd.dao.MediaFileDao;
 import party.threebody.herd.domain.MediaFile;
 import party.threebody.herd.job.BasicLinarJob;
 import party.threebody.herd.job.UnitaryJob;
-import party.threebody.herd.util.HerdFileUtils;
+import party.threebody.herd.util.HerdFiles;
 import party.threebody.herd.util.MediaTypeUtils;
 import party.threebody.skean.collections.Maps;
 import party.threebody.skean.web.SkeanNotFoundException;
@@ -59,7 +59,7 @@ public class BatchSyncJob extends MonoBatchSyncJob {
                     @Override
                     public String takeStep() throws Exception {
                         oldMediaFiles = mediaFileDao.listByPathPrefix(rootDirPath.toString());
-                        newPaths = HerdFileUtils.listAllFilesDeeply(rootDirPath);
+                        newPaths = HerdFiles.listAllFilesDeeply(rootDirPath);
                         deadMediaFiles = oldMediaFiles.stream()
                                 .filter(mp -> !Files.exists(Paths.get(mp.getPath())))
                                 .collect(Collectors.toList());
@@ -120,7 +120,7 @@ public class BatchSyncJob extends MonoBatchSyncJob {
             } else {  // create after hash
                 MediaFile mf = new MediaFile();
                 mf.setHash(hash);
-                mf.setPath(path.toString());
+                mf.setPath(HerdFiles.toString(path));
                 mf.setSize(fileSize);
                 mf.setSyncTime(LocalDateTime.now());
                 mf.setMimeType(MediaTypeUtils.guessMimeTypeByPath(mf.getPath()));
