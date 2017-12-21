@@ -72,6 +72,7 @@
    */
   import _ from 'lodash'
   import Renders from './TableManRenders'
+  import { translateResp } from '../utils/RestUtils'
 
   export default {
     name: 'table-man',
@@ -221,7 +222,7 @@
         const self = this
         return d => {
           let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + actionName : '')
-          self.$notify.success({title: actionName + '成功', message: msg})
+          self.$Notice.success({title: actionName + '成功', desc: msg})
           self.ui.editing = false
           self.ui.saving = false
           self.ui.deleting = false
@@ -231,12 +232,8 @@
       notifyFail (actionName) {
         const self = this
         return d => {
-          let msg = '[' + d.error + '] '
-          msg += (d.message || '')
-          if (d.debugInfo) {
-            msg += d.debugInfo.message
-          }
-          self.$notify.error({title: actionName + '失败', message: msg, duration: 0})
+          let resp2 = translateResp(actionName, d)
+          self.$Notice.error({title: resp2.title, desc: resp2.body, duration: 0})
           self.ui.saving = false
           self.ui.deleting = false
           self.ui.loading = false

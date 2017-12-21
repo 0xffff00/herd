@@ -19,25 +19,50 @@ const responding = (okayCallback, failCallback) => resp => {
       okayCallback(arg)
     })
   } else {
-    resp.json().then(failCallback)
+    _failCall(resp, failCallback)
   }
 }
 const respondingAf = (okayCallback, failCallback) => resp => {
   const status = resp.status
   if (resp.ok) {
     const totalAffected = parseInt(resp.headers.get('X-Total-Affected')) || null
-    console.log('aaaaasaaa', totalAffected)
+    console.log('resp - totalAffected: ', totalAffected)
     resp.text().then(text => {
+      let data = text
       try {
-        const data = JSON.parse(text)
-        okayCallback({totalAffected, data, status})
+        data = JSON.parse(text)
       } catch (err) {
       }
+      okayCallback({totalAffected, data, status})
     })
   } else {
-    console.log('aaaaaaaa', resp)
-    resp.json().then(data => failCallback({data, status}))
+    _failCall(resp, failCallback)
   }
 }
 
-export { responding, respondingAf, CB_NO_OP, DEFAULT_HEADERS }
+const _failCall = (resp, failCallback) => {
+  let status = resp.status
+  resp.text().then(text => {
+    let data = text
+    try {
+      data = JSON.parse(text)
+    } catch (err) {
+    }
+    // console.log(data)
+    failCallback({data, status})
+  })
+}
+
+const translateResp = (actionName, sk2Resp) => {
+  console.log(actionName, sk2Resp)
+  let st0 = sk2Resp.status || (sk2Resp.data ? sk2Resp.data.status : '')
+  let st1 = st0 ? '[' + st0 + ']' : ''
+  let err1 = sk2Resp.data && sk2Resp.data.error || ''
+  let bd1 = sk2Resp.data ? (sk2Resp.data.message || '') + (sk2Resp.data.debugInfo || '') : null
+  return {
+    title: `${actionName}失败: ${st1} ${err1}`,
+    body: bd1
+  }
+}
+
+export { responding, respondingAf, CB_NO_OP, DEFAULT_HEADERS, translateResp }

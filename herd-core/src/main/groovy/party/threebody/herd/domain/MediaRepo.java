@@ -21,6 +21,23 @@ public class MediaRepo {
     @LastUpdateTime private LocalDateTime saveTime;
     @Column private String state;
 
+    private transient int fileCnt,imgCnt;
+
+    public int getFileCnt() {
+        return fileCnt;
+    }
+
+    public void setFileCnt(int fileCnt) {
+        this.fileCnt = fileCnt;
+    }
+
+    public int getImgCnt() {
+        return imgCnt;
+    }
+
+    public void setImgCnt(int imgCnt) {
+        this.imgCnt = imgCnt;
+    }
 
     public String getName() {
         return name;

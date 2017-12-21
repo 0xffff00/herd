@@ -47,6 +47,7 @@
   import TextUtils from '../utils/Texts'
   import Arrays from '../utils/Arrays'
   import TableMan from '../components/TableMan'
+  import { translateResp } from '../utils/RestUtils'
 
   function startLoop (func, interval = 500, timeout = 60000 * 15) {
     let res = setInterval(func, interval)
@@ -130,6 +131,18 @@
               sk2template: 'state'
             },
             {
+              key: 'fileCnt',
+              title: '文件数',
+              sortable: false,
+              editable: false
+            },
+            {
+              key: 'imgCnt',
+              title: '图像数',
+              sortable: false,
+              editable: false
+            },
+            {
               title: '操作',
               key: 'action',
               sk2template: 'action',
@@ -137,7 +150,7 @@
                 'edit',
                 'delete',
                 {actionName: '同步', actionFunc: this.startBatchSyncByRepo},
-                {actionName: '清空', actionFunc: this.clearSyncByRepo}
+                {actionName: '清空', actionFunc: this.truncateRepo}
               ]
             }
           ]
@@ -187,27 +200,34 @@
           })
         })
       },
+      truncateRepo (repo) {
+        const self = this
+        herdApi.jobs.mediaRepos.truncate(
+          {repoName: repo.name},
+          d => {
+            console.log(d)
+            self.$Notice.success({title: `清空${repo.name}成功`, message: `删除${d.data}条记录`})
+          },
+          self.notifyFail(`清空${repo.name}`))
+      },
       notifyAffectOk (actionName) {
         const self = this
         return d => {
-          // console.log(d)
+          console.log(d)
           let msg = ''
           if (d.data && d.data.counts) {
             msg = d.data.summary
           } else if (d.totalAffected) {
             msg = d.totalAffected + '个条目已' + actionName
           }
-          self.$notify.success({title: actionName + '成功', message: msg})
+          self.$Notice.success({title: actionName + '成功', desc: msg})
         }
       },
       notifyFail (actionName) {
         const self = this
         return d => {
-          let msg = d.message || ''
-          if (d.debugInfo) {
-            msg += d.debugInfo.message
-          }
-          self.$notify.error({title: actionName + '失败', message: msg, duration: 0})
+          let resp2 = translateResp(actionName, d)
+          self.$Notice.error({title: resp2.title, desc: resp2.body, duration: 0})
         }
       }
     },
