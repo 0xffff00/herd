@@ -53,12 +53,18 @@ public class JobController {
         return makeImageThumbnailsJob.getStatus();
     }
 
-    private Path getRepoRootDirPath(String repoName){
+    private Path getRepoRootDirPath(String repoName) {
         MediaRepo mediaRepo = mediaRepoDao.readOne(repoName);
         if (mediaRepo == null) {
             throw new SkeanNotFoundException("repoName:" + repoName);
         }
         return Paths.get(mediaRepo.getPath());
+    }
+
+    @DeleteMapping("media-repos")
+    public Object truncateMediaRepo(@RequestParam String repoName) {
+        MediaRepo mediaRepo = mediaRepoDao.readOne(repoName);
+        return herdService.truncateMediaFiles(mediaRepo.getPath());
     }
 
 }

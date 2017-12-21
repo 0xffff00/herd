@@ -5,10 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import party.threebody.herd.dao.ImageInfoDao;
 import party.threebody.herd.dao.MediaFileDao;
 import party.threebody.herd.domain.MediaFile;
 import party.threebody.herd.util.MediaType;
+import party.threebody.skean.data.query.BasicCriterion;
+import party.threebody.skean.data.query.Criteria;
 import party.threebody.skean.jdbc.rs.DualColsBean;
 import party.threebody.skean.jdbc.rs.TripleColsBean;
 
@@ -68,6 +71,12 @@ public class HerdService {
             return Files.readAllBytes(path);
         }
         return null;
+    }
+
+    @Transactional
+    public int truncateMediaFiles(String pathPrefix){
+        int rna=mediaFileDao.deleteSomeByPathPrefix(pathPrefix);
+        return rna;
     }
 
 }

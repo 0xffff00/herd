@@ -26,7 +26,8 @@ imageInfos.countByDate = ajaxList(CTX + '/image-infos/countByDate')
 
 const jobs = {
   batchSync: {},
-  thumbnail: {}
+  thumbnail: {},
+  mediaRepos: {}
 }
 jobs.batchSync.start = (params, okayCallback, failCallback) => {
   new RestApi(CTX + '/jobs/batch-sync', '?repoName={repoName}')
@@ -39,6 +40,10 @@ jobs.batchSync.status = (okayCallback, failCallback) => {
 jobs.thumbnail.status = (okayCallback, failCallback) => {
   new RestApi(CTX + '/jobs/image/thumbnails/status')
     .httpGet(null, okayCallback, failCallback)
+}
+jobs.mediaRepos.truncate = (params, okayCallback, failCallback) => {
+  new RestApi(CTX + '/jobs/media-repos', '?repoName={repoName}')
+    .httpDelete(params, okayCallback, failCallback)
 }
 
 export default {
