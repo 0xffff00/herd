@@ -63,7 +63,7 @@ public class MakeImageThumbnailsJob extends BasicLinarJob<Path> {
 
     @Override
     protected String takeStep(Path path) throws Exception {
-        MediaFile mf = mediaFileDao.readOne(path.toString());
+        MediaFile mf = mediaFileDao.readOne(HerdFiles.toString(path));
         if (!MediaTypeUtils.isImageFileByPath(path.toString())){
             return SKIPPED;
         }

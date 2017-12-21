@@ -34,6 +34,7 @@ public class MonoBatchSyncJob extends ComposedLinarJob {
         } catch (RuntimeException e1) {
             throw new SkeanException("do MonoBatchSyncJob failed.", e1);
         } finally {
+            resetRootStatus();
             batchSyncService.releaseRepoSyncLock();
         }
 

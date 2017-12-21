@@ -39,7 +39,7 @@ public class ParseMediaFilesJob extends BasicLinarJob<Path> {
 
     @Override
     protected String takeStep(Path path) throws Exception {
-        MediaFile mf = mediaFileDao.readOne(path.toString());
+        MediaFile mf = mediaFileDao.readOne(HerdFiles.toString(path));
         if (mf == null) {
             return FAILED;
         }

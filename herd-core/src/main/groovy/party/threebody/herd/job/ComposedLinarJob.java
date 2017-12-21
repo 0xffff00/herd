@@ -66,6 +66,10 @@ public class ComposedLinarJob implements LinarJob {
         rootStatus.next(null);
     }
 
+    public void resetRootStatus() {
+        rootStatus = null;
+    }
+
     @Override
     public JobStatus getStatus() {
         return getFlattenStatus();
