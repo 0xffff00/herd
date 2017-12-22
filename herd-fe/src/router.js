@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import iView from 'iview'
 import Hello from '@/views/Hello'
+import Album from '@/views/Album'
 import Album2 from '@/views/Album2'
 import RepoMan from '@/views/RepoMan'
 import WordMan from '@/views/WordMan'
@@ -21,6 +22,11 @@ const router = new VueRouter({
       path: '/album2',
       name: 'Album2',
       component: Album2
+    },
+    {
+      path: '/album',
+      name: 'Album',
+      component: Album
     },
     {
       path: '/repo-man',

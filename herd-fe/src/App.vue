@@ -12,6 +12,12 @@
         <router-link to="/album2">
           <MenuItem name="/album2">
             <Icon type="images"></Icon>
+            相册x
+          </MenuItem>
+        </router-link>
+        <router-link to="/album">
+          <MenuItem name="/album">
+            <Icon type="images"></Icon>
             相册
           </MenuItem>
         </router-link>
@@ -74,7 +80,7 @@
 
 <script>
   import hello from './views/Hello'
-  import album from './views/Album2'
+  import album from './views/Album'
   import Urls from './utils/Urls'
 
   export default {

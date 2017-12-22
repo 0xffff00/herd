@@ -58,7 +58,7 @@
         return _.keys(this.countMapByMonth)
       },
       involvedMonthsCount () {
-        return this.countMapByMonth.length
+        return this.involvedMonths.length
       },
       xOf1stDateInEachMonth () { // y -> x of 1st date in month
         let res = new Array(this.involvedWeeksCount).fill(-1)
@@ -69,6 +69,22 @@
             res[co.y] = co.x
           }
         }
+        return res
+      },
+      /**
+       * month -> month block's height without fractal
+       */
+      blockIntHeightByMonthMap () {
+        let map = this.countMapByMonth
+        let accCnt = 0
+        let accH = 0
+        let h = 0
+        let res = {}
+        Object.keys(map).forEach(month => {
+          accCnt += map[month]
+          res[month] = h = Math.round(accCnt / 7 * 17 - accH)
+          accH += h
+        })
         return res
       }
     },
@@ -114,8 +130,7 @@
         return `background: rgb(${c.r},${c.g},${c.b});`
       },
       cssOfMonthBlock (month) {
-        let cnt = this.countMapByMonth[month]
-        let h = cnt / 7 * 18
+        let h = this.blockIntHeightByMonthMap[month]
         let monNo = parseInt(month.slice(5, 7))
         let bgc = monNo % 2 ? '#efe' : '#dfd'
         return `height:${h}px;background:${bgc}`
@@ -157,12 +172,18 @@
     {r: 48, g: 64, b: 0},
     9, 65
   )
+
   const midNum = (x, y, k) => x + (y - x) * k
   const midInt = (x, y, k) => Math.floor(x + (y - x) * k)
   const midRgb = (x, y, k) => ({r: midInt(x.r, y.r, k), g: midInt(x.g, y.g, k), b: midInt(x.b, y.b, k)})
 
 </script>
 <style scoped>
+
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
 
   table.month-bar {
     float: left;
@@ -176,23 +197,25 @@
   }
 
   table.month-bar td .year {
-    color: dimgray;
+    color: #123;
     font-size: 18px;
   }
 
   table.month-bar td .month {
     color: gray;
+    font-size: 24px;
   }
 
   table.week-bar {
     float: left;
-    border-spacing: 1px;
+    border-spacing: 0px;
   }
 
   table.week-bar td {
     width: 17px;
     height: 17px;
-    margin: 1px;
+    /*margin: 1px;*/
+    padding: 1px;
     color: red;
   }
 
@@ -202,16 +225,18 @@
     height: 100%;
   }
 
+
+
   .mon-dn {
-    border-bottom: dotted 1px red;
+    border-bottom: dashed 1px #bb7;
   }
 
   .mon-up {
-    border-top: dotted 1px red;
+    border-top: dashed 1px #bb7;
   }
 
   .mon-lt {
-    border-left: dotted 1px red;
+    border-left: dashed 1px #bb7;
   }
 
 </style>

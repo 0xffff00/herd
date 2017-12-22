@@ -26,7 +26,7 @@ const jobs = {
   },
   thumbnail: {
     start: params => new Api(CTX + '/jobs/batch-sync', '?repoName={repoName}').httpGet(params),
-    status: new Api(CTX + '/jobs/image/thumbnails/status').httpGet(null),
+    status: new Api(CTX + '/jobs/image/thumbnails/status').httpGet(null)
   },
   mediaRepos: {
     truncate: params => new Api(CTX + '/jobs/media-repos', '?repoName={repoName}').httpDelete(params)
