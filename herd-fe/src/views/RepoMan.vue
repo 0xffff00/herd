@@ -29,16 +29,10 @@
         </div>
       </div>
     </TableMan>
+    <AsyncProgressBox name="同步媒体库" :start-tick="batchSync.startTick" :apis="batchSync.apis"
+                      :params="batchSync.params">
 
-    <Modal v-model="sync.running || sync.ui.informing" :title="sync.ui.title"
-           @on-cancel="sync.ui.informing=false">
-      <Progress :percent="syncPercent" status="active"></Progress>
-
-      <b>{{sync.current}}/{{sync.totalSteps}}</b>
-      <div style="height: 4em;">{{sync.currentMessage}}</div>
-      <div slot="footer">
-      </div>
-    </Modal>
+    </AsyncProgressBox>
   </div>
 </template>
 <script>
@@ -47,66 +41,17 @@
   import TextUtils from '../utils/Texts'
   import Arrays from '../utils/Arrays'
   import TableMan from '../components/TableMan'
-  import { translateResp } from '../utils/RestUtils'
-
-  class HeartbeatMonitor {
-
-    /**
-     * @param model an obj like {running,current,totalSteps,currentMessage}, may be vue's data
-     * @param statusGetApi a GET must respond Skean JobStatus
-     * @param status2GetApi a GET must respond Skean JobStatus
-     */
-    constructor (model, statusGetApi, status2GetApi = null) {
-      this.model=model
-      this.statusGetApi = statusGetApi
-      this.status2GetApi = status2GetApi || statusGetApi
-    }
-
-    beat(){
-      statusGetApi(d => {
-        this.model.running = d.data.running
-        this.model.current = d.data.current
-        this.model.totalSteps = d.data.totalSteps
-        this.model.currentMessage = d.data.currentMessage
-        if (!self.sync.running) {
-          this.stop()
-          this.model.ui.informing = true
-          this.model.ui.title = '同步结束'
-          this.model.current = this.model.totalSteps
-        }
-      }, d => {
-        this.notifyFail('')
-        this.stop()
-      })
-    }
-    start (func, interval = 500, timeoutSec = 60 * 15) {
-      console.info(`starting HeartbeatMonitor[id=${this.id}]...`)
-      this.id = setInterval(this.beat, interval)
-      setTimeout(() => {
-        clearInterval(this.id)
-      }, timeoutSec * 1000)
-    }
-
-    stop () {
-      console.info(`stopping HeartbeatMonitor[id=${this.id}]...`)
-      clearInterval(this.id)
-    }
-  }
+  import AsyncProgressBox from '../components/AsyncProgressBox.vue'
 
   export default {
     name: 'repo-man',
     data () {
       return {
-        sync: {
-          ui: {
-            title: null,
-            informing: false,
-            heartbeatMonitor: null
-          },
-          running: false,
-          current: 0,
-          totalSteps: 0,
-          currentMessage: null
+        batchSync: {
+          startTick: 0,
+          params: null,
+          apis: herdApi.jobs.batchSync
+
         },
         data: {
           result: {
@@ -192,73 +137,26 @@
       }
     },
     computed: {
-      'ui.editor.title': function () {
-        let n = this.itemName
-        return (this.ui.currItem) ? '新增' + n : '修改' + n
-      },
-      'syncPercent': function () {
-        return Math.floor(this.sync.current / this.sync.totalSteps * 100)
-      }
     },
     methods: {
       startBatchSyncByRepo (repo) {
         let self = this
-        herdApi.jobs.batchSync.start({repoName: repo.name}, () => {}, this.notifyFail('s'))
-        self.sync.current = 0
-        self.sync.running = true
-        self.sync.ui.title = '正在同步...'
-        let hbm = self.sync.heartbeatMonitor = new HeartbeatMonitor(
-          herdApi.jobs.batchSync.status, herdApi.jobs.batchSync.statusAll)
-        hbm.start(() => {
-          herdApi.jobs.batchSync.status(d => {
-            self.sync.running = d.data.running
-            self.sync.current = d.data.current
-            self.sync.totalSteps = d.data.totalSteps
-            self.sync.currentMessage = d.data.currentMessage
-            if (!self.sync.running) {
-              hbm.stop()
-              self.sync.ui.informing = true
-              self.sync.ui.title = '同步结束'
-              self.sync.current = self.sync.totalSteps
-            }
-          }, d => {
-            this.notifyFail('')
-            hbm.stop()
-          })
-        })
+        self.batchSync.params = {repoName: repo.name}
+        self.batchSync.startTick++
       },
       truncateRepo (repo) {
         const self = this
-        herdApi.jobs.mediaRepos.truncate(
-          {repoName: repo.name},
-          d => {
-            console.log(d)
-            self.$Notice.success({title: `清空${repo.name}成功`, message: `删除${d.data}条记录`})
-          },
-          self.notifyFail(`清空${repo.name}`))
-      },
-      notifyOkAf (actionName) {
-        const self = this
-        return d => {
-          console.log(d)
-          let msg = ''
-          if (d.data && d.data.counts) {
-            msg = d.data.summary
-          } else if (d.totalAffected) {
-            msg = d.totalAffected + '个条目已' + actionName
+        herdApi.jobs.mediaRepos.truncate({repoName: repo.name})(resp2 => {
+          console.log(resp2)
+          if (resp2.ok) {
+            self.$Notice.success({title: `清空${repo.name}成功`, message: `删除${resp2.data}条记录`})
+          } else {
+            self.msgBox.show(resp2)
           }
-          self.$Notice.success({title: actionName + '成功', desc: msg})
-        }
-      },
-      notifyFail (actionName) {
-        const self = this
-        return d => {
-          let resp2 = translateResp(actionName, d)
-          self.$Notice.error({title: resp2.title, desc: resp2.body, duration: 0})
-        }
+        })
       }
     },
-    components: {TableMan}
+    components: {TableMan, AsyncProgressBox}
   }
 </script>
 <style scoped>

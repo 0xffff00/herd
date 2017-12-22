@@ -72,7 +72,7 @@
    */
   import _ from 'lodash'
   import Renders from './TableManRenders'
-  import MsgBox from 'MsgBox'
+  import MsgBox from './MsgBox'
 
   export default {
     name: 'table-man',
@@ -149,9 +149,6 @@
       },
       isEditingForCreate () {
         return this.data.editor.itemOld === null
-      },
-      msgBox () {
-        return new MsgBox(this)
       }
     },
     props: {
@@ -170,32 +167,32 @@
       readItems () {
         let self = this
         self.ui.loading = true
-        self.model.api.httpGetSome(
-          self.translatedQuerierParams,
-          d => {
-            console.log(d)
-            self.data.result.items = d.data
-            self.data.result.totalCount = d.totalCount
-            // self.$message({type: 'success', message: '加载成功 x ' + self.ui.loadTick})
-            self.ui.loading = false
-          },
-          self.notifyFail('加载')
-        )
+        self.model.api.httpGetSome(self.translatedQuerierParams)(resp2 => {
+          console.log(resp2)
+          // self.$message({type: 'success', message: '加载成功 x ' + self.ui.loadTick})
+          if (resp2.ok) {
+            self.data.result.items = resp2.data
+            self.data.result.totalCount = resp2.totalCount
+          } else {
+            MsgBox.open(self, '加载')
+          }
+          self.ui.loading = false
+        })
       },
       deleteItem (item) {
         const self = this
         self.ui.deleting = true
-        self.model.api.httpDelete(item, self.notifyOkAf('删除'), self.notifyFail('删除'))
+        self.model.api.httpDelete(item)(MsgBox.open(self, '删除'))
       },
       saveItem () {
         const self = this
         this.ui.saving = true
         const isNew = self.data.editor.itemOld === null
         if (isNew) {
-          self.model.api.httpPost(self.data.editor.item, self.notifyOkAf('创建'), self.notifyFail('创建'))
+          self.model.api.httpPost(self.data.editor.item)(MsgBox.open(self, '创建'))
         } else {
           const changes = changesOfItem(self.data.editor.itemOld, self.data.editor.item, self.model.columns)
-          self.model.api.httpPatch(self.data.editor.itemOld, changes, self.notifyOkAf('更新'), self.notifyFail('更新'))
+          self.model.api.httpPatch(self.data.editor.itemOld, changes)(MsgBox.open(self, '更新'))
         }
       },
 
@@ -209,36 +206,6 @@
       openEditorDialog (item) {
         this.data.editor.item = _.cloneDeep(item)
         this.ui.editing = true
-      },
-      openConfirmDialog (actionDesc, nextAction) {
-        this.$confirm('即将' + actionDesc + ', 是否继续?', '警告', {
-          confirmButtonText: '是',
-          cancelButtonText: '否',
-          type: 'warning'
-        }).then(nextAction)
-          .catch(() => {
-            this.$message({type: 'info', message: '已取消' + actionDesc})
-          })
-      },
-
-      notifyOkAf (actionName) {
-        const self = this
-        return resp2 => {
-          self.msgBox.show(resp2)
-          self.ui.saving = false
-          self.ui.deleting = false
-          self.ui.loading = false
-          self.readItems()
-        }
-      },
-      notifyFail (actionName) {
-        const self = this
-        return resp2 => {
-          self.msgBox.show(resp2)
-          self.ui.saving = false
-          self.ui.deleting = false
-          self.ui.loading = false
-        }
       },
       pageSizeChanged (pageSize) {
         this.querier.pageSize = pageSize

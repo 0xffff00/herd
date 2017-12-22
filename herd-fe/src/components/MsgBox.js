@@ -1,5 +1,3 @@
-import { respond } from './SkeanApis'
-
 /**
  * resp2 -> errInfo
  * @param resp2
@@ -18,24 +16,31 @@ function toErrInfo (resp2, actionName = '操作') {
   }
 }
 
-export default class MsgBox {
-
-  constructor (vue) {
-    this.vue = vue
-  }
-
-  show (resp2, actionName = null) {
-    if (resp2.ok) {
-      let title = ( actionName || '操作') + '成功'
-      let body = ''
-      if (resp2.totalAffected) {
-        body = resp2.totalAffected + '个条目' + ( actionName ? '已' + actionName : '受影响')
-      }
-      this.vue.$Notice.success({title: title, desc: body})
-    } else {
-      let errInfo = toErrInfo(resp2, actionName)
-      this.vue.$Notice.error({title: errInfo.title, desc: errInfo.body, duration: 0})
+const open = (vue, actionName = null) => (resp2) => {
+  if (resp2.ok) {
+    let title = (actionName || '操作') + '成功'
+    let body = ''
+    if (resp2.totalAffected) {
+      body = resp2.totalAffected + '个条目' + (actionName ? '已' + actionName : '受影响')
     }
+    this.vue.$Notice.success({title: title, desc: body})
+  } else {
+    let errInfo = toErrInfo(resp2, actionName)
+    this.vue.$Notice.error({title: errInfo.title, desc: errInfo.body, duration: 0})
   }
+}
 
+function openConfirmDialog (actionDesc, nextAction) {
+  this.vue.$confirm('即将' + actionDesc + ', 是否继续?', '警告', {
+    confirmButtonText: '是',
+    cancelButtonText: '否',
+    type: 'warning'
+  }).then(nextAction)
+    .catch(() => {
+      this.vue.$message({type: 'info', message: '已取消' + actionDesc})
+    })
+}
+
+export default {
+  open
 }
