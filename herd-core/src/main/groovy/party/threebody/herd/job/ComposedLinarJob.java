@@ -1,7 +1,8 @@
 package party.threebody.herd.job;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import party.threebody.skean.misc.SkeanException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -13,6 +14,8 @@ import java.util.stream.Stream;
  * a LinarJob composed by child LinarJobs
  */
 public class ComposedLinarJob implements LinarJob {
+
+    private static final Logger logger = LoggerFactory.getLogger(BasicLinarJob.class);
 
     private BasicJobStatus rootStatus;
     private FlattenJobStatus flattenStatus;
@@ -52,22 +55,38 @@ public class ComposedLinarJob implements LinarJob {
 
     @Override
     public void start() {
-        if (rootStatus != null && rootStatus.isRunning()) {
-            throw new SkeanException("fail to start since ComposedLinarJob has been running.");
+        if (rootStatus != null && rootStatus.getCategory().equals(JobStatus.Category.RUNNING)) {
+            halt("fail to start an already running job.");
         }
         rootStatus = new BasicJobStatus(getChildren().size());
         flattenStatus = null;
         rootStatus.setStartTime(LocalDateTime.now());
         for (LinarJob child : children) {
+            child.resetStatus();
+        }
+        for (LinarJob child : children) {
             rootStatus.next(child.getName());
             child.start();
+            if (child.getStatus().getCategory().equals(JobStatus.Category.HALTED)) {
+                halt(child.getStatus().getCurrentMessage());
+            }
             rootStatus.asDone();
         }
         rootStatus.next(null);
     }
 
-    public void resetRootStatus() {
+    @Override
+    public void resetStatus() {
         rootStatus = null;
+    }
+
+    @Override
+    public void halt(String message) {
+        if (rootStatus == null) {
+            rootStatus = new BasicJobStatus(0);
+        }
+        logger.error("Job[{}] HALTED: ", getName(), message);
+        rootStatus.asHalted(message);
     }
 
     @Override
@@ -202,6 +221,11 @@ public class ComposedLinarJob implements LinarJob {
             return getChildren().get(x);
         }
 
+
+        @Override
+        public Category getCategory() {
+            return root.getCategory();
+        }
 
         @Override
         public String getCurrentMessage() {

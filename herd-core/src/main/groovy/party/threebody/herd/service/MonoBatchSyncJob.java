@@ -30,11 +30,13 @@ public class MonoBatchSyncJob extends ComposedLinarJob {
             batchSyncService.takeRepoSyncLock();
             super.start();
         } catch (SkeanException e) {
+            halt(e.getMessage());
             throw e;
         } catch (RuntimeException e1) {
+            halt(e1.getMessage());
             throw new SkeanException("do MonoBatchSyncJob failed.", e1);
         } finally {
-            resetRootStatus();
+            resetStatus();
             batchSyncService.releaseRepoSyncLock();
         }
 

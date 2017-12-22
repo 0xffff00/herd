@@ -21,6 +21,7 @@ public abstract class UnitaryJob extends BasicLinarJob<Object> {
         return takeStep();
     }
 
+
     public abstract String takeStep() throws Exception;
 
     public static UnitaryJob of(String name, Supplier<String> stepTaking) {
@@ -36,4 +37,5 @@ public abstract class UnitaryJob extends BasicLinarJob<Object> {
             }
         };
     }
+
 }

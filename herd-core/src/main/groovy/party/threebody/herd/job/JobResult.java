@@ -7,6 +7,6 @@ public interface JobResult {
     String SKIPPED = "SKIPPED";
     String DONE = "DONE";
     String CANCELLED = "CANCELLED";
-    String FATAL = "FATAL";
+    String HALTED = "HALTED";
 
 }

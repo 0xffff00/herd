@@ -15,6 +15,7 @@ public class BasicJobStatus implements JobStatus {
     private LocalDateTime currentStartTime;
     private int totalSteps;
 
+    private boolean broken;
 
     private Map<String, AtomicInteger> results;   //result tag -> count
 
@@ -82,6 +83,11 @@ public class BasicJobStatus implements JobStatus {
         as(JobResult.SKIPPED);
     }
 
+    public void asHalted(String fatalMessage) {
+        as(JobResult.HALTED);
+        currentMessage=fatalMessage;
+        broken = true;
+    }
 
     @Override
     public LocalDateTime getStartTime() {
@@ -117,4 +123,19 @@ public class BasicJobStatus implements JobStatus {
     public void setResults(Map<String, AtomicInteger> results) {
         this.results = results;
     }
+
+    @Override
+    public Category getCategory() {
+        if (broken) {
+            return Category.HALTED;
+        }
+        if (getCurrent() ==0){
+            return Category.INITIAL;
+        }
+        if (getCurrent() > getTotalSteps()){
+            return Category.COMPLETED;
+        }
+       return Category.RUNNING;
+    }
+
 }

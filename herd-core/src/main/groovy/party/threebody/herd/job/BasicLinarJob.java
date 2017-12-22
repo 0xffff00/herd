@@ -2,7 +2,6 @@ package party.threebody.herd.job;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import party.threebody.skean.misc.SkeanException;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -31,10 +30,20 @@ public abstract class BasicLinarJob<C> implements LinarJob {
     public abstract Collection<C> getStepConsumers();
 
     /**
-     * tell how to take a step. any Exception will check of this step as FAILED
+     * <h1>tell how to take a step.</h1>
+     * <br>
+     * 2 ways to make the job HALTED:
+     * <li> throw a JobHaltException</li>
+     * <li> return HALTED</li
+     * <br>
+     * 2 ways to make current step FAILED:
+     * <li> throw any other Exception</li>
+     * <li> return FAILED</li>
+     * <br>
+     * Returning null will be regard as OK
      *
      * @param consumer
-     * @return JobResult string, such as FAILED, OK; regards null as OK
+     * @return JobResult string, such as FAILED, SKIPPED, OK; regards null as OK
      * @throws Exception
      */
     protected abstract String takeStep(C consumer) throws Exception;
@@ -49,19 +58,19 @@ public abstract class BasicLinarJob<C> implements LinarJob {
 
     @Override
     public void start() {
-        if (status != null && status.isRunning()) {
-            throw new SkeanException("fail to start since BasicLinarJob[" + getName() + "] has been running.");
+        if (status != null && status.getCategory().equals(JobStatus.Category.RUNNING)) {
+            halt("fail to start an already running job.");
         }
         Collection<C> consumers = getStepConsumers();
         if (consumers == null) {
-            throw new SkeanException("fail to start since Job[" + getName() + "]'s consumers not initialized.");
+            halt("stepConsumers not initialized.");
         }
         status = new BasicJobStatus(consumers.size());
         status.setStartTime(LocalDateTime.now());
         logger.info("Job[{}] Started. {} steps included.", getName(), consumers.size());
         for (C item : consumers) {
             String result = startNextStep(item);
-            if (FATAL.equals(result)) {
+            if (HALTED.equals(result)) {
                 break;
             }
         }
@@ -69,7 +78,7 @@ public abstract class BasicLinarJob<C> implements LinarJob {
         logger.info("Job[{}] Finished. {}", getName(), status.getResults());
     }
 
-    protected String startNextStep(C consumer) {
+    private String startNextStep(C consumer) {
         String stepText = getStepText(consumer);
         int curr = status.next(stepText);
         LocalDateTime t1 = status.getCurrentStartTime();
@@ -87,6 +96,9 @@ public abstract class BasicLinarJob<C> implements LinarJob {
             String s3 = String.format(". %d ms used.", timeUsed);
             logger.info(s1 + s2 + stepText + s3);
             return result;
+        } catch (JobHaltException jhe) {
+            halt(jhe.getMessage());
+            return HALTED;
         } catch (Exception e) {
             status.as(FAILED);
             String s2 = String.format(" %7s ", FAILED);
@@ -94,6 +106,15 @@ public abstract class BasicLinarJob<C> implements LinarJob {
             return FAILED;
         }
 
+    }
+
+    @Override
+    public void halt(String message) {
+        if (status == null) {
+            status = new BasicJobStatus(0);
+        }
+        logger.error("Job[{}] HALTED: ", getName(), message);
+        status.asHalted(message);
     }
 
     @Override
@@ -105,6 +126,12 @@ public abstract class BasicLinarJob<C> implements LinarJob {
             }
         }
         return status;
+    }
+
+
+    @Override
+    public void resetStatus() {
+        status = null;
     }
 
     public void setStatus(BasicJobStatus jobStatus) {

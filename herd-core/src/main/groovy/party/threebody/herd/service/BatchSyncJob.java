@@ -58,7 +58,7 @@ public class BatchSyncJob extends MonoBatchSyncJob {
                 new UnitaryJob() {
                     @Override
                     public String takeStep() throws Exception {
-                        oldMediaFiles = mediaFileDao.listByPathPrefix(rootDirPath.toString());
+                        oldMediaFiles = mediaFileDao.listByPathPrefix(HerdFiles.toString(rootDirPath));
                         newPaths = HerdFiles.listAllFilesDeeply(rootDirPath);
                         deadMediaFiles = oldMediaFiles.stream()
                                 .filter(mp -> !Files.exists(Paths.get(mp.getPath())))
@@ -96,7 +96,7 @@ public class BatchSyncJob extends MonoBatchSyncJob {
         protected String takeStep(Path path) throws Exception {
             Thread.sleep(10);
             Optional<MediaFile> opmf = oldMediaFiles.stream()
-                    .filter(mp -> mp.getPath().equals(path.toString()))
+                    .filter(mp -> mp.getPath().equals(HerdFiles.toString(path)))
                     .findFirst();
             int fileSize = (int) Files.size(path);
             if (opmf.isPresent()) {
