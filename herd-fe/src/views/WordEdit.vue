@@ -297,13 +297,13 @@
           ? {src: w, dst: v, attr: attr}
           : {src: v, dst: w, attr: attr}
         event.target.value = null
-        DictApi.basicRelations.httpPost(rel, this.notifyAffectOk(actionName), this.notifyFail(actionName))
+        DictApi.basicRelations.httpPost(rel, this.notifyOkAf(actionName), this.notifyFail(actionName))
       },
       /**
        * delete a basic relation
        */
       delBR (rel, attrName) {
-        DictApi.basicRelations.httpDelete(rel, this.notifyAffectOk('移除' + attrName), this.notifyFail('移除' + attrName))
+        DictApi.basicRelations.httpDelete(rel, this.notifyOkAf('移除' + attrName), this.notifyFail('移除' + attrName))
       },
 
       addX1RtoLast (siblingES, event) {
@@ -311,19 +311,19 @@
         let v = event.target.value
         let w = this.word.text
         let rel = {src: w, attr: lastRel.attr, attrx: lastRel.attrx, pred: lastRel.pred, dst: v}
-        DictApi.x1Relations.httpPost(rel, this.notifyAffectOk('添加属性'), this.notifyFail('添加属性'))
+        DictApi.x1Relations.httpPost(rel, this.notifyOkAf('添加属性'), this.notifyFail('添加属性'))
       },
 
       addX1R () {
         this.editor.x1RelToAdd.src = this.word.text
-        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd, this.notifyAffectOk('添加属性'), this.notifyFail('添加属性'))
+        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd, this.notifyOkAf('添加属性'), this.notifyFail('添加属性'))
       },
       addX1R2 () {
         this.editor.x1RelToAdd2.dst = this.word.text
-        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd2, this.notifyAffectOk('添加引用'), this.notifyFail('添加引用'))
+        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd2, this.notifyOkAf('添加引用'), this.notifyFail('添加引用'))
       },
       delX1R (rel) {
-        DictApi.x1Relations.httpDelete(rel, this.notifyAffectOk('移除属性'), this.notifyFail('移除属性'))
+        DictApi.x1Relations.httpDelete(rel, this.notifyOkAf('移除属性'), this.notifyFail('移除属性'))
       },
       // delete X1R by example's (src,attr,attrx)
       delX1Rs (exampleRels) {
@@ -333,7 +333,7 @@
           this.$notify.error({title: '无法批量删除', message: '条件缺失:' + JSON.stringify(r1), duration: 0})
           return
         }
-        DictApi.x1Relations.httpDeleteSome(r1, this.notifyAffectOk('移除属性'), this.notifyFail('移除属性'))
+        DictApi.x1Relations.httpDeleteSome(r1, this.notifyOkAf('移除属性'), this.notifyFail('移除属性'))
       },
 
       // ------------ misc ---------------
@@ -359,7 +359,7 @@
         }, self.notifyFail('加载词汇'))
       },
 
-      notifyAffectOk (actionName) {
+      notifyOkAf (actionName) {
         const self = this
         return d => {
           let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + actionName : '')

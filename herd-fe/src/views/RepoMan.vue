@@ -49,18 +49,48 @@
   import TableMan from '../components/TableMan'
   import { translateResp } from '../utils/RestUtils'
 
-  function startLoop (func, interval = 500, timeout = 60000 * 15) {
-    let res = setInterval(func, interval)
-    console.log(`starting loop[${res}]...`)
-    setTimeout(() => {
-      clearInterval(res)
-    }, timeout)
-    return res
-  }
+  class HeartbeatMonitor {
 
-  function stopLoop (loopId) {
-    console.log(`stopping loop[${loopId}]...`)
-    clearInterval(loopId)
+    /**
+     * @param model an obj like {running,current,totalSteps,currentMessage}, may be vue's data
+     * @param statusGetApi a GET must respond Skean JobStatus
+     * @param status2GetApi a GET must respond Skean JobStatus
+     */
+    constructor (model, statusGetApi, status2GetApi = null) {
+      this.model=model
+      this.statusGetApi = statusGetApi
+      this.status2GetApi = status2GetApi || statusGetApi
+    }
+
+    beat(){
+      statusGetApi(d => {
+        this.model.running = d.data.running
+        this.model.current = d.data.current
+        this.model.totalSteps = d.data.totalSteps
+        this.model.currentMessage = d.data.currentMessage
+        if (!self.sync.running) {
+          this.stop()
+          this.model.ui.informing = true
+          this.model.ui.title = '同步结束'
+          this.model.current = this.model.totalSteps
+        }
+      }, d => {
+        this.notifyFail('')
+        this.stop()
+      })
+    }
+    start (func, interval = 500, timeoutSec = 60 * 15) {
+      console.info(`starting HeartbeatMonitor[id=${this.id}]...`)
+      this.id = setInterval(this.beat, interval)
+      setTimeout(() => {
+        clearInterval(this.id)
+      }, timeoutSec * 1000)
+    }
+
+    stop () {
+      console.info(`stopping HeartbeatMonitor[id=${this.id}]...`)
+      clearInterval(this.id)
+    }
   }
 
   export default {
@@ -71,18 +101,12 @@
           ui: {
             title: null,
             informing: false,
-            loopId: null
+            heartbeatMonitor: null
           },
           running: false,
           current: 0,
           totalSteps: 0,
-          currentMessage: null,
-          thumbnail: {
-            running: false,
-            current: 0,
-            totalSteps: 0,
-            currentMessage: null
-          }
+          currentMessage: null
         },
         data: {
           result: {
@@ -183,20 +207,23 @@
         self.sync.current = 0
         self.sync.running = true
         self.sync.ui.title = '正在同步...'
-        self.sync.ui.loopId = startLoop(() => {
+        let hbm = self.sync.heartbeatMonitor = new HeartbeatMonitor(
+          herdApi.jobs.batchSync.status, herdApi.jobs.batchSync.statusAll)
+        hbm.start(() => {
           herdApi.jobs.batchSync.status(d => {
             self.sync.running = d.data.running
             self.sync.current = d.data.current
             self.sync.totalSteps = d.data.totalSteps
             self.sync.currentMessage = d.data.currentMessage
             if (!self.sync.running) {
-              stopLoop(self.sync.ui.loopId)
+              hbm.stop()
               self.sync.ui.informing = true
               self.sync.ui.title = '同步结束'
               self.sync.current = self.sync.totalSteps
             }
-          }, () => {
-            stopLoop(self.sync.ui.loopId)
+          }, d => {
+            this.notifyFail('')
+            hbm.stop()
           })
         })
       },
@@ -210,7 +237,7 @@
           },
           self.notifyFail(`清空${repo.name}`))
       },
-      notifyAffectOk (actionName) {
+      notifyOkAf (actionName) {
         const self = this
         return d => {
           console.log(d)

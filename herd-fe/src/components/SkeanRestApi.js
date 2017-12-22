@@ -1,5 +1,5 @@
-import { appendQParams, CB_NO_OP, DEFAULT_HEADERS, responding, respondingAf } from './RestUtils'
-import Urls from './Urls'
+import { CB_NO_OP, respond, DEFAULT_HEADERS } from './SkeanApis'
+import SkeanUrls from './SkeanUrls'
 
 const stringify = obj => obj ? JSON.stringify(obj) : null
 export default class RestApi {
@@ -41,75 +41,68 @@ export default class RestApi {
   }
 
   getPluralUrlWithWithQParams (params) {
-    return Urls.appendQParams(this.pluralUrl, params)
+    return SkeanUrls.appendQParams(this.pluralUrl, params)
   }
 
   /**
    * get a list of part and count of all by http GET request
    * @param params
-   * @param okayCallback
-   * @param failCallback
    */
-  httpGetSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpGetSome (params) {
     const finalUrl = this.getPluralUrlWithWithQParams(params)
-    fetch(finalUrl, {method: 'GET'}).then(responding(okayCallback, failCallback))
+    return callback => fetch(finalUrl, {method: 'GET'}).then(respond(callback))
   }
 
-  httpGet (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpGet (params) {
     const finalUrl = this.singularUrlBuilder(params)
-    fetch(finalUrl, {method: 'GET'}).then(responding(okayCallback, failCallback))
+    return callback => fetch(finalUrl, {method: 'GET'}).then(respond(callback))
   }
 
-  httpPost (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpPost (params) {
     const finalUrl = this.pluralUrl
-    fetch(finalUrl, {
-      method: 'POST',
-      headers: DEFAULT_HEADERS,
-      body: stringify(params)
-    })
-      .then(respondingAf(okayCallback, failCallback))
+    return callback =>
+      fetch(finalUrl, {
+        method: 'POST',
+        headers: DEFAULT_HEADERS,
+        body: stringify(params)
+      })
+        .then(respond(callback))
   }
 
-  httpDelete (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpDelete (params) {
     const finalUrl = this.singularUrlBuilder(params)
-    fetch(finalUrl, {
-      method: 'DELETE'
-    })
-      .then(respondingAf(okayCallback, failCallback))
+    return callback => fetch(finalUrl, {method: 'DELETE'}).then(respond(callback))
   }
 
-  httpDeleteSome (params, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpDeleteSome (params) {
     const finalUrl = this.getPluralUrlWithWithQParams(params)
-    fetch(finalUrl, {
-      method: 'DELETE'
-    })
-      .then(respondingAf(okayCallback, failCallback))
+    return callback => fetch(finalUrl, {method: 'DELETE'}).then(respond(callback))
   }
 
   /**
    *
    * @param oldParams body in PUT request
    * @param newParams uri-q-params in PUT request
-   * @param okayCallback
-   * @param failCallback
    */
-  httpPut (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpPut (oldParams, newParams) {
     const finalUrl = this.singularUrlBuilder(oldParams)
-    fetch(finalUrl, {
-      method: 'PUT',
-      headers: DEFAULT_HEADERS,
-      body: stringify(newParams)
-    })
-      .then(respondingAf(okayCallback, failCallback))
+    return callback =>
+      fetch(finalUrl, {
+        method: 'PUT',
+        headers: DEFAULT_HEADERS,
+        body: stringify(newParams)
+      })
+        .then(respond(callback))
   }
 
-  httpPatch (oldParams, newParams, okayCallback = CB_NO_OP, failCallback = CB_NO_OP) {
+  httpPatch (oldParams, newParams) {
     const finalUrl = this.singularUrlBuilder(oldParams)
-    fetch(finalUrl, {
-      method: 'PATCH',
-      headers: DEFAULT_HEADERS,
-      body: stringify(newParams)
-    })
-      .then(respondingAf(okayCallback, failCallback))
+    return callback =>
+      fetch(finalUrl, {
+        method: 'PATCH',
+        headers: DEFAULT_HEADERS,
+        body: stringify(newParams)
+      })
+        .then(respond(callback))
   }
 }
