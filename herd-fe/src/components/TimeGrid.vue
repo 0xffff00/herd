@@ -1,6 +1,6 @@
 <template>
-  <div class="time-grid">
-    <table class="month-bar" :style="cssOfMonthBar">
+  <div class="time-grid" :style="cssStyleOfTimeGrid">
+    <table class="month-bar" :style="cssStyleOfMonthBar">
       <tr v-for="month in involvedMonths">
         <td :style="cssOfMonthBlock(month)">
           <span v-if="month.endsWith('01')" class="year" :style="cssStyleOfYear">{{month.slice(0, 4)}}</span>
@@ -12,7 +12,8 @@
       <tr v-for="y1 in involvedWeeksCount">
         <td v-for="x1 in 7" :class="cssClassOfDateTd(x1-1,y1-1)" :style="cssStyleOfDateTd(x1-1,y1-1)">
           <a :style="cssOfDateBlock(x1 - 1, y1 - 1)"
-             :title="getItem(x1 - 1, y1 - 1).date+'('+getItem(x1 - 1, y1 - 1).cnt+')'">
+             :title="getItem(x1 - 1, y1 - 1).date+'('+getItem(x1 - 1, y1 - 1).cnt+')'"
+             :href="hrefOfDate(x1 - 1, y1 - 1)">
           </a>
         </td>
       </tr>
@@ -53,6 +54,9 @@
       },
       countMapByMonth () {
         return _.mapValues(_.groupBy(this.countByDate, x => x.date.slice(0, 7)), x => x.length)
+      },
+      countMapByYear () {
+        return _.mapValues(_.groupBy(this.countByDate, x => x.date.slice(0, 4)), x => x.length)
       },
       involvedMonths () {
         return _.keys(this.countMapByMonth)
@@ -105,8 +109,12 @@
       cssOfWeekBar () {
         return ``
       },
-      cssOfMonthBar () {
+      cssStyleOfMonthBar () {
         let w = this.monthBarStyle.width
+        return `width:${w}px;`
+      },
+      cssStyleOfTimeGrid () {
+        let w = this.monthBarStyle.width + 8
         return `width:${w}px;`
       },
       cssStyleOfYear () {
@@ -176,6 +184,16 @@
         let monNo = parseInt(month.slice(5, 7))
         let bgc = monNo % 2 ? '#e2e' : '#e4a'
         return `height:${h}px;color:${bgc}`
+      },
+      hrefOfDate (x, y) {
+//        let idx = this.idx(x, y)
+//        let v = null
+//        for (let i = idx; i < idx + 50 && i < this.countByDateObjArr.length; i++) {
+//          if ((v = this.countByDateObjArr[i]).cnt) break
+//        }
+        let v = this.getItem(x, y)
+        if (v && v.cnt) return `#img-${v.date}`
+        return `#img-${v.date && v.date.slice(0, 4)}`
       }
     }
   }
@@ -229,9 +247,17 @@
 </script>
 <style scoped>
 
-
   ::-webkit-scrollbar {
-    /*width: 36px;*/
+    width: 8px;
+    height: 0;
+  }
+
+  ::-webkit-scrollbar-track-piece {
+    background: #ccc
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #aaa
   }
 
   .time-grid {

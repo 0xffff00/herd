@@ -26,8 +26,9 @@ class ImageInfoDao extends LegacySinglePKJpaCrudDAO<ImageInfo, String> {
     @Override
     List<ImageInfo> readList(CriteriaAndSortingAndPaging csp) {
         def sql = """
-SELECT *,(SELECT size FROM hd_media m WHERE m.hash=mi.hash) file_size
-FROM $table  mi
+SELECT (SELECT size FROM hd_me_file  WHERE fi.hash=HASH LIMIT 1) file_size,
+fi.*
+FROM hd_me_file_image fi
 """
         cjt.fromSql(sql).suite(csp).list(ImageInfo.class)
     }

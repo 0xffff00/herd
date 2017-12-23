@@ -9,7 +9,7 @@ configure(allprojects) { project ->
             'HikariCP'           : '2.7.1',
             'spring-boot'        : '2.0.0.M4',
             'h2'                 : '1.4.196',
-            'skean'              : '2.3.0'
+            'skean'              : '2.4.0-SNAPSHOT'
     ]
 
     repositories {

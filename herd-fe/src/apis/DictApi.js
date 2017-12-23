@@ -1,6 +1,5 @@
 import Api from '../components/SkeanRestApi'
 import appConf from '../../config/sk2/app-conf'
-import { responding, respondingAf, CB_NO_OP, DEFAULT_HEADERS } from '../utils/RestUtils'
 
 const CTX = appConf.apis.dict.url
 

@@ -5,47 +5,51 @@
       </TimeGrid>
     </div>
 
-
-    <!--  <div class="gallery">
-        <div class="img-cate-big" v-for="imgBC in imgBigCates" :id="'img-bc-'+imgBC.name">
-          <h3>{{imgBC.name}}
-            &lt;!&ndash;<span>({{imgBC.cnt}}) a-a {{countLoadedInBigCate(imgBC)}}</span>&ndash;&gt;
-          </h3>
-
-          <div class="img-cate-mid" v-for="imgMC in imgBC.imgMidCates" :id="'img-mc-'+imgMC.dateStr">
-            <h4>{{imgMC.name}}</h4>
-            <span class="img-hull" v-for="(im,i) in imgMC.imageMedias">
-              <el-tooltip placement="top" :offset="30" :open-delay="500">
-                 <div slot="content">
-                   HASH值：{{describeHash(im.hash)}}<br>
-                   拍摄时间：{{describeExifDateTime(im.exifDateTime)}} <br>
-                   相机：{{im.exifMake}} {{im.exifModel}}<br>
-                   尺寸：{{describeImageSize(im.width, im.height)}}<br>
-                   文件：{{im.type}}格式， {{describeFileSize(im.fileSize)}}<br>
+    <!--{{imageInfosByY}}-->
+    <div class="gallery">
+      <div class="img-cate-big" v-for="rowByY in imageInfosByY" :id="'img-'+rowByY.y">
+        <h2>{{rowByY.y}}({{rowByY.cnt}})</h2>
+        <div class="img-cate-big" v-for="rowByYM in rowByY.byYM" :id="'img-'+rowByYM.ym">
+          <h3>{{rowByYM.ym}}({{rowByYM.cnt}})</h3>
+          <div class="img-cate-mid" v-for="rowByYMD in rowByYM.byYMD" :id="'img-'+rowByYMD.ymd">
+            <h4>{{rowByYMD.ymd}}({{rowByYMD.imgs.length}})</h4>
+            <span class="img-hull" v-for="img in rowByYMD.imgs">
+               <Tooltip placement="top" content="Tooltip 文字提示" :delay="400">
+                  <div slot="content">
+                   HASH值：{{describeHash(img.hash)}}<br>
+                   拍摄时间：{{describeExifDateTime(img.exifDateTime)}} <br>
+                   相机：{{img.exifMake}} {{img.exifModel}}<br>
+                   尺寸：{{describeImageSize(img.width, img.height)}}<br>
+                   文件：{{img.type}}格式， {{describeFileSize(img.fileSize)}}<br>
                  </div>
-                <img :src="getUrlByHash(im.hash,'1Kq5')"/>
-              </el-tooltip>
 
-              </span>
+              </Tooltip>
+              <img :src="getUrlByHash(img.hash,'1Kq5')"/>
+            </span>
           </div>
-          <span class="img-hull img-hull-more" v-if="!isAllLoadedInBigCate(imgBC)">
-                <a @click="loadMoreImagesOfBigCate(imgBC)">
-                  &lt;!&ndash;:href="'#img-bc-'+imgBC.name"&ndash;&gt;
-                  <span style="font-size:24px;">{{imgBC.cnt - countLoadedInBigCate(imgBC)}}</span>
-                  <i class="fa fa-angle-double-right fa-2x" aria-hidden="true"></i></a>
-              </span>
+          <!--<span class="img-hull img-hull-more" v-if="!isAllLoadedInBigCate(imgBC)">-->
+            <!--<a @click="loadMoreImagesOfBigCate(imgBC)">-->
+            <!--<span style="font-size:24px;">{{imgBC.cnt - countLoadedInBigCate(imgBC)}}</span>-->
+            <!--<i class="fa fa-angle-double-right fa-2x" aria-hidden="true"></i></a>-->
+          <!--</span>-->
         </div>
-      </div>-->
+
+      </div>
+    </div>
+
+
   </div>
 
 </template>
 <script>
+  import _ from 'lodash'
   import herdApi from '../apis/HerdApi'
   import Dates from '../utils/Dates'
   import TextUtils from '../utils/Texts'
   import Arrays from '../utils/Arrays'
   import TimeGrid from '../components/TimeGrid.vue'
   import moment from 'moment'
+  import MsgBox from '../components/MsgBox'
 
   /*
   Big Cate : catorgories by month
@@ -53,17 +57,27 @@
   imgBigCate:{year,month,cnt,imgMidCates}
   imgMidCate:{dateStr,imageMedias}
   imageMedias is ordered by time desc
+
+  imagesByMonth: {ym:'2012-12',}
+  imagesByDate {}
    */
   export default {
     name: 'Album',
     data () {
       return {
         // like [["2017-03-01",1],["2017-03-05",25]], ordered
-        countByDateArr2d: []
+        countByDateArr2d: [],
+        // like [{hash,width,exifDateTime,fileSize..}..], ordered by exifDateTime asc
+        imageInfos: [],
+        // like imageInfo, but exifDateTime is null, ordered by hash
+        imageInfosNoDT: [],
+
+        maxImagesInWindow: 600
       }
     },
-    mounted () {
-      this.load()
+    created () {
+      this.loadTimeGrid()
+      this.loadImages({exifDateTime_GE: '2016', f: 0, l: 200})
     },
     computed: {
       // like ["2017-03-01""2017-03-05"], ordered
@@ -98,10 +112,18 @@
           res.push({date: str, cnt: map[str] || 0})
         }
         return res
+      },
+
+      imageInfosByY () {
+        const self = this
+        const src = self.imageInfos
+        let r = iis2byY(src)
+        console.log('r232323=', r)
+        return r
       }
     },
     methods: {
-      load () {
+      loadTimeGrid () {
         const self = this
         herdApi.imageInfos.countByDate(res => {
           if (!res.data || !res.data.length) return
@@ -110,23 +132,50 @@
           if (res.data[len - 1][0] === null) len--
           self.countByDateArr2d = res.data.slice(0, len)
         })
-        // this.loadImages('9999-12-31', 0, 20)
+        // this.loadImages({exifDateTime_LT: d, f: offset, l: 20})
       },
-      loadMoreImagesOfBigCate (imgBigCate) {
-        let offset = this.countLoadedInBigCate(imgBigCate)
-        if (imgBigCate.year) {
-          let d = Dates.toIsoTime(imgBigCate.year, imgBigCate.month + 1, 1, 0, 0, 0)
-          this.loadImages({exifDateTime_LT: d, f: offset, l: 20})
-        } else {
-          this.loadImages({exifDateTime: null, f: offset, l: 20})
-        }
-      },
+//      loadMoreImagesOfBigCate (imgBigCate) {
+//        let offset = this.countLoadedInBigCate(imgBigCate)
+//        if (imgBigCate.year) {
+//          let d = Dates.toIsoTime(imgBigCate.year, imgBigCate.month + 1, 1, 0, 0, 0)
+//          this.loadImages({exifDateTime_LT: d, f: offset, l: 20})
+//        } else {
+//          this.loadImages({exifDateTime: null, f: offset, l: 20})
+//        }
+//      },
       loadImages (params) {
-        Object.assign(params, {o: '-exifDateTime'})
+        const self = this
+        Object.assign(params, {o: 'exifDateTime'})
         // console.log(params)
-        herdApi.listImageMedias(params, res => {
-          res.forEach(imageMedia => this._addImageMediaToCates(imageMedia))
+        herdApi.imageInfos.httpGetSome(params)(resp2 => {
+          if (!resp2.ok) {
+            MsgBox.open(self, '加载图片')(resp2)
+            return
+          }
+          let imageInfosToPut = resp2.data
+          if (!imageInfosToPut || !imageInfosToPut.length) {
+            self.$Notice.warning({title: '没有图片了'})
+            return
+          }
+          imageInfosToPut.forEach(img => self.putImageInfosInOrder(img))
         })
+      },
+      putImageInfosInOrder (imageInfo) {
+        const self = this
+        let dt = imageInfo.exifDateTime
+        if (dt === null) { // hasn't exifDateTime
+          let arr = self.imageInfosNoDT
+          let x = _.sortedIndex(arr, imageInfo, 'hash')
+          if (!arr[x] || arr[x].hash !== imageInfo.hash) {
+            arr.splice(x, 0, imageInfo)
+          }
+        } else {  // has exifDateTime
+          let arr = self.imageInfos
+          let x = _.sortedIndex(arr, imageInfo, 'exifDateTime')
+          if (!arr[x] || arr[x].hash !== imageInfo.hash) {
+            arr.splice(x, 0, imageInfo)
+          }
+        }
       },
       getUrlByHash: herdApi.getUrlByHash,
       describeImageSize: TextUtils.describeImageSize,
@@ -137,19 +186,48 @@
     components: {TimeGrid}
   }
 
-  const ExifDateTimeUtils = {
-    readYear (exifDateTime = '') {
-      return parseInt(exifDateTime.slice(0, 4))
+  const DT = {
+    toY (exifDateTime = '') {
+      return exifDateTime.slice(0, 4)
     },
-    readMonth (exifDateTime = '') {
-      return parseInt(exifDateTime.slice(5, 7))
+    toM (exifDateTime = '') {
+      return exifDateTime.slice(5, 7)
     },
-    readDay (exifDateTime = '') {
-      return parseInt(exifDateTime.slice(8, 10))
+    toD (exifDateTime = '') {
+      return exifDateTime.slice(8, 10)
     },
-    readDateStr (exifDateTime = '') {
+    toYM (exifDateTime = '') {
+      return exifDateTime.slice(0, 7)
+    },
+    toYMD (exifDateTime = '') {
       return exifDateTime.slice(0, 10)
     }
+  }
+
+  /*
+   compute byY from imageInfos
+   iis means imageInfos
+   byY=[y:'2019',cnt:233,byYM:byYM]
+   byYM=[m:11,ym:'2019-11',cnt:32,byYMD:byYMD]
+   byYMD=[d:23,ymd:'2019-11-23',imgs:[imageInfo...]]
+    */
+  const iis2byYMD = iis => {
+    let ymd2iisMap = _.groupBy(iis, ii => DT.toYMD(ii.exifDateTime))
+    return Object.keys(ymd2iisMap).map(ymd => ({
+      ymd: ymd, imgs: ymd2iisMap[ymd]
+    }))
+  }
+  const iisbyYM = iis => {
+    let ym2iisMap = _.groupBy(iis, ii => DT.toYM(ii.exifDateTime))
+    return Object.keys(ym2iisMap).map(ym => ({
+      ym: ym, cnt: ym2iisMap[ym].length, byYMD: iis2byYMD(ym2iisMap[ym])
+    }))
+  }
+  const iis2byY = iis => {
+    let y2iisMap = _.groupBy(iis, ii => DT.toY(ii.exifDateTime))
+    return Object.keys(y2iisMap).map(y => ({
+      y: y, cnt: y2iisMap[y].length, byYM: iisbyYM(y2iisMap[y])
+    }))
   }
 
 </script>
@@ -197,12 +275,12 @@
   }
 
   .album2 .gallery .img-hull img {
-
     height: 100%;
     object-fit: contain;
   }
 
   .album2 .gallery .img-hull-more {
+
     width: 100px;
     border-radius: 5px;
     border: solid 1px rgb(144, 127, 255);
