@@ -1,9 +1,7 @@
 <template>
   <div class="album2">
     <div class="sidebar">
-      <TimeGrid :data="countByDateObjArr">
-
-
+      <TimeGrid :countByDate="countByDateObjArr" :cssDateTdHeight="15" :cssDateTdPadding="1">
       </TimeGrid>
     </div>
 
@@ -96,7 +94,6 @@
         let map = this.countByDateMap
         let res = []
         for (let i = 0; i < n; d.add(1, 'd'), i++) {
-          console.log(d)
           let str = d.format('YYYY-MM-DD')
           res.push({date: str, cnt: map[str] || 0})
         }
@@ -126,7 +123,7 @@
       },
       loadImages (params) {
         Object.assign(params, {o: '-exifDateTime'})
-        console.log(params)
+        // console.log(params)
         herdApi.listImageMedias(params, res => {
           res.forEach(imageMedia => this._addImageMediaToCates(imageMedia))
         })
@@ -167,9 +164,9 @@
   }
 
   .album2 .sidebar {
-    position: fixed;
-    overflow: scroll;
-    height: 100%;
+    /*position: fixed;*/
+    /*overflow: scroll;*/
+    /*height: 100%;*/
     /*font-size: 10px;*/
   }
 

@@ -1,17 +1,18 @@
 <template>
   <div class="time-grid">
-    <table class="month-bar">
+    <table class="month-bar" :style="cssOfMonthBar">
       <tr v-for="month in involvedMonths">
         <td :style="cssOfMonthBlock(month)">
-          <span v-if="month.endsWith('01')" class="year">{{month.slice(0, 4)}}</span>
-          <span v-else class="month">{{month.slice(5, 7)}}</span>
+          <span v-if="month.endsWith('01')" class="year" :style="cssStyleOfYear">{{month.slice(0, 4)}}</span>
+          <span v-else class="month" :style="cssStyleOfMonth">{{month.slice(5, 7)}}</span>
         </td>
       </tr>
     </table>
-    <table class="week-bar">
+    <table class="week-bar" :style="cssOfWeekBar">
       <tr v-for="y1 in involvedWeeksCount">
-        <td v-for="x1 in 7" :style="cssOfDateBlock(x1 - 1, y1 - 1)" :class="[cssOfBorder(x1-1,y1-1)]">
-          <a :title="getItem(x1 - 1, y1 - 1).date+'('+getItem(x1 - 1, y1 - 1).cnt+')'">
+        <td v-for="x1 in 7" :class="cssClassOfDateTd(x1-1,y1-1)" :style="cssStyleOfDateTd(x1-1,y1-1)">
+          <a :style="cssOfDateBlock(x1 - 1, y1 - 1)"
+             :title="getItem(x1 - 1, y1 - 1).date+'('+getItem(x1 - 1, y1 - 1).cnt+')'">
           </a>
         </td>
       </tr>
@@ -37,22 +38,21 @@
       }
     },
     props: {
-      data: {type: Array},
-      groupBy: {type: String}
+      countByDate: {type: Array},
+      cssDateTdHeight: {type: Number, default: 17},
+      cssDateTdPadding: {type: Number, default: 1}
     },
     computed: {
       offsetInFirstWeek () {
-        let a0 = this.data[0]
+        let a0 = this.countByDate[0]
+        if (!a0 || !a0.date) return 0
         return (moment(a0.date).day() + 6) % 7  // default format: 'YYYY-MM-DD'
       },
       involvedWeeksCount () {
-        return Math.ceil((this.offsetInFirstWeek + this.data.length) / 7)
-      },
-      saa () {
-        return `height:${this.involvedWeeksCount * 18}px;`
+        return Math.ceil((this.offsetInFirstWeek + this.countByDate.length) / 7)
       },
       countMapByMonth () {
-        return _.mapValues(_.groupBy(this.data, x => x.date.slice(0, 7)), x => x.length)
+        return _.mapValues(_.groupBy(this.countByDate, x => x.date.slice(0, 7)), x => x.length)
       },
       involvedMonths () {
         return _.keys(this.countMapByMonth)
@@ -62,8 +62,8 @@
       },
       xOf1stDateInEachMonth () { // y -> x of 1st date in month
         let res = new Array(this.involvedWeeksCount).fill(-1)
-        for (let k = 0; k < this.data.length; k++) {
-          let d = this.data[k]
+        for (let k = 0; k < this.countByDate.length; k++) {
+          let d = this.countByDate[k]
           if (d.date.endsWith('01')) {
             let co = this.coord(k)
             res[co.y] = co.x
@@ -71,21 +71,49 @@
         }
         return res
       },
-      /**
-       * month -> month block's height without fractal
-       */
-      blockIntHeightByMonthMap () {
+      xOf1stDateInEachYear () { // y -> x of 1st date in year
+        let res = new Array(this.involvedWeeksCount).fill(-1)
+        for (let k = 0; k < this.countByDate.length; k++) {
+          let d = this.countByDate[k]
+          if (d.date.endsWith('01-01')) {
+            let co = this.coord(k)
+            res[co.y] = co.x
+          }
+        }
+        return res
+      },
+      monthBarStyle () {
         let map = this.countMapByMonth
+        let dtdh = this.cssDateTdHeight
         let accCnt = 0
-        let accH = 0
+        let heightTotal = 0
         let h = 0
-        let res = {}
+        let heightByMonthMap = {}
         Object.keys(map).forEach(month => {
           accCnt += map[month]
-          res[month] = h = Math.round(accCnt / 7 * 17 - accH)
-          accH += h
+          heightByMonthMap[month] = h = Math.round(accCnt / 7 * dtdh - heightTotal)
+          heightTotal += h
         })
-        return res
+        return {
+          heightByMonthMap, // month -> month block's height without fractal
+          heightTotal,  // height of bar
+          width: dtdh * 7,
+          monthFontSize: Math.round(dtdh * 2.5),
+          yearFontSize: Math.round(dtdh * 2)
+        }
+      },
+      cssOfWeekBar () {
+        return ``
+      },
+      cssOfMonthBar () {
+        let w = this.monthBarStyle.width
+        return `width:${w}px;`
+      },
+      cssStyleOfYear () {
+        return `font-size:${this.monthBarStyle.yearFontSize}pt`
+      },
+      cssStyleOfMonth () {
+        return `font-size:${this.monthBarStyle.monthFontSize}pt`
       }
     },
     mounted () {
@@ -105,35 +133,49 @@
        */
       idx (x, y) {
         let idx = x + y * 7 - this.offsetInFirstWeek
-        if (idx < 0 || idx >= this.data.length) {
+        if (idx < 0 || idx >= this.countByDate.length) {
           return -1
         }
         return idx
       },
       getItem (x, y) {
         let idx = this.idx(x, y)
-        return idx < 0 ? {} : this.data[idx]
+        return idx < 0 ? {} : this.countByDate[idx]
       },
-
-      cssOfBorder (x, y) {
+      cssStyleOfDateTd (x, y) {
+        let dtdh = this.cssDateTdHeight
+        let dtdp = this.cssDateTdPadding
+        return `
+        width: ${dtdh}px;
+        height: ${dtdh}px;
+        padding: ${dtdp}px;
+        background: rgba(255, 255, 255, 0.8);
+        `
+      },
+      cssClassOfDateTd (x, y) {
+        let res = []
         let e = this.xOf1stDateInEachMonth[y]
-        let res = ''
         if (e !== -1) {
-          res = (x >= e) ? 'mon-up' : 'mon-dn'
-          if (x === e && e !== 0) res += ' mon-lt'
+          res = (x >= e) ? ['mo', 'mo-up'] : ['mo', 'mo-dn']
+          if (x === e && e !== 0) res.push('mo-lt')
+        }
+        let e1 = this.xOf1stDateInEachYear[y]
+        if (e1 !== -1) {
+          res = (x >= e1) ? ['yr', 'yr-up'] : ['yr', 'yr-dn']
+          if (x === e1 && e1 !== 0) res.push('yr-lt')
         }
         return res
       },
       cssOfDateBlock (x, y) {
         let v = this.getItem(x, y).cnt
         let c = J_1_9_GREEN(v)
-        return `background: rgb(${c.r},${c.g},${c.b});`
+        return `background: rgba(${c.r},${c.g},${c.b},0.7);`
       },
       cssOfMonthBlock (month) {
-        let h = this.blockIntHeightByMonthMap[month]
+        let h = this.monthBarStyle.heightByMonthMap[month]
         let monNo = parseInt(month.slice(5, 7))
-        let bgc = monNo % 2 ? '#efe' : '#dfd'
-        return `height:${h}px;background:${bgc}`
+        let bgc = monNo % 2 ? '#e2e' : '#e4a'
+        return `height:${h}px;color:${bgc}`
       }
     }
   }
@@ -176,67 +218,113 @@
   const midNum = (x, y, k) => x + (y - x) * k
   const midInt = (x, y, k) => Math.floor(x + (y - x) * k)
   const midRgb = (x, y, k) => ({r: midInt(x.r, y.r, k), g: midInt(x.g, y.g, k), b: midInt(x.b, y.b, k)})
+  let x = 2
+  x = 3
+  x = 6
+  x = 3
+  x = 6
+  x = 3
+  x = 6
 
 </script>
 <style scoped>
 
 
   ::-webkit-scrollbar {
-    width: 6px;
+    /*width: 36px;*/
+  }
+
+  .time-grid {
+    position: fixed;
+    overflow: scroll;
+    height: 90%;
+    width: 100%;
   }
 
   table.month-bar {
-    float: left;
+    position: absolute;
+    z-index: 4;
     width: 30px;
     border-spacing: 0;
   }
 
   table.month-bar td {
-    padding-bottom: 1px;
-    background: blanchedalmond;
+    vertical-align: top;
   }
 
   table.month-bar td .year {
-    color: #123;
-    font-size: 18px;
+    position: absolute;
+    color: #100;
+    font-weight: 900;
+    width: 100%;
+    text-align: center;
   }
 
   table.month-bar td .month {
-    color: gray;
-    font-size: 24px;
+    position: absolute;
+    font-weight: 500;
+    color: #111;
+    width: 100%;
+    text-align: center;
   }
 
   table.week-bar {
-    float: left;
-    border-spacing: 0px;
+    position: absolute;
+    z-index: 5;
+    border-spacing: 0;
   }
 
-  table.week-bar td {
-    width: 17px;
-    height: 17px;
-    /*margin: 1px;*/
-    padding: 1px;
-    color: red;
-  }
+  /*table.week-bar td {*/
+  /*width: 17px;*/
+  /*height: 17px;*/
+  /*!*margin: 1px;*!*/
+  /*padding: 1px;*/
+  /*color: red;*/
+  /*background: rgba(255, 255, 255, 0.8);*/
+  /*}*/
 
   table.week-bar td a {
     display: block;
     width: 100%;
     height: 100%;
+
   }
 
-
-
-  .mon-dn {
-    border-bottom: dashed 1px #bb7;
+  table.week-bar td.mo {
+    border-color: rgba(144, 140, 50, 0.3);
+    border-style: dashed;
+    border-width: 0;
   }
 
-  .mon-up {
-    border-top: dashed 1px #bb7;
+  table.week-bar td.mo-dn {
+    border-bottom-width: 1px;
   }
 
-  .mon-lt {
-    border-left: dashed 1px #bb7;
+  table.week-bar td.mo-up {
+    border-top-width: 1px;
   }
+
+  table.week-bar td.mo-lt {
+    border-left-width: 1px;
+  }
+
+  table.week-bar td.yr {
+    border-color: rgba(56, 43, 50, 0.8);
+    border-style: solid;
+    border-width: 0;
+  }
+
+  table.week-bar td.yr-dn {
+    border-bottom-width: 1px;
+  }
+
+  table.week-bar td.yr-up {
+    border-top-width: 1px;
+  }
+
+  table.week-bar td.yr-lt {
+    border-left-width: 1px;
+  }
+
 
 </style>

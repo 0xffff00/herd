@@ -1,6 +1,6 @@
 {
   "name": "herd-fe",
-  "version": "1.0.0",
+  "version": "0.6.1",
   "description": "front-end subproject of Herd",
   "author": "hzk <hzkchina@gmail.com>",
   "private": true,
