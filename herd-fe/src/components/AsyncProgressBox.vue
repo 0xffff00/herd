@@ -1,6 +1,6 @@
 <template>
-  <Modal v-model="status.category === 'RUNNING' || ui.informing" :title="ui.title"
-         @on-cancel="ui.informing=false">
+  <Modal v-model="ui.visible" :title="ui.title"
+         @on-cancel="ui.visible=false" :closable="true" :mask-closable="false">
     <Progress :percent="progressPercent" status="active"></Progress>
 
     <b>{{status.current}}/{{status.totalSteps}}</b>
@@ -30,7 +30,7 @@
           results: null
         },
         ui: {
-          informing: false,
+          visible: false,
           title: ''
         },
         jobId: 0,
@@ -50,6 +50,7 @@
     props: {
       name: {type: String},
       startTick: {type: Number},
+      startHeartbeatTick: {type: Number, default: 0},
       /**
        * apis.start: a PUT
        * apis.status: a GET must respond Skean JobStatus
@@ -70,14 +71,15 @@
           self.$Notice.warning({title: '无法同时运行多个任务!'})
           return
         }
-        self.failCnt = 0
-        self.status.current = 0
-        self.ui.title = `[进行中] ${self.name}`
         self.apis.start(self.params)(resp2 => {})
         self.startHeartbeat(self.heartbeatInterval, self.heartbeatTimeout)
       },
       startHeartbeat (interval, timeout) {
         const self = this
+        self.status.current = 0
+        self.ui.title = `[进行中] ${self.name}`
+        self.ui.visible = true
+        self.failCnt = 0
         self.jobId = setInterval(self.refreshStatus, interval)
         console.info(`starting Heartbeat Job[id=${self.jobId}]...`)
         setTimeout(() => {
@@ -105,8 +107,7 @@
 //          }
           if (!resp2.data || resp2.data.category !== 'RUNNING') {
             self.stopHeartbeat()
-            self.ui.title = `[已停止] ${self.name}`
-            self.ui.informing = true
+            self.ui.title = `[${resp2.data.category}] ${self.name}`
             self.status.current = self.status.totalSteps
           }
         })
@@ -115,6 +116,9 @@
     watch: {
       startTick: function (v) {
         this.start()
+      },
+      startHeartbeatTick: function (v) {
+        this.startHeartbeat(this.heartbeatInterval, this.heartbeatTimeout)
       }
     }
   }

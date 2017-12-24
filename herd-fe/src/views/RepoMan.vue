@@ -3,6 +3,7 @@
     <TableMan :data="data" :ui.sync="ui" :model="model"
               :querier="querier">
       <div slot="criteria-pane">
+        <Button @click="batchSync.startHeartbeatTick++">查看当前任务</Button>
         <div>
 
           <!--<el-form :inline="true" :model="querier">-->
@@ -29,8 +30,10 @@
         </div>
       </div>
     </TableMan>
-    <AsyncProgressBox name="同步媒体库" :start-tick="batchSync.startTick" :apis="batchSync.apis"
-                      :params="batchSync.params">
+    <AsyncProgressBox name="同步媒体库" :apis="batchSync.apis"
+                      :params="batchSync.params"
+                      :start-tick="batchSync.startTick"
+                      :start-heartbeat-tick="batchSync.startHeartbeatTick">
 
     </AsyncProgressBox>
   </div>
@@ -49,6 +52,7 @@
       return {
         batchSync: {
           startTick: 0,
+          startHeartbeatTick: 0,
           params: null,
           apis: herdApi.jobs.batchSync
 
@@ -136,8 +140,7 @@
 
       }
     },
-    computed: {
-    },
+    computed: {},
     methods: {
       startBatchSyncByRepo (repo) {
         let self = this
