@@ -5,6 +5,7 @@
         <Button type="info" shape="circle" size="small">预览</Button>
       </a>
       <ButtonGroup shape="circle" size="small">
+        <Button type="ghost" icon="ios-refresh" @click="loadItem()">刷新</Button>
         <Button type="ghost" icon="ios-plus-empty" @click="">保存</Button>
         <Button type="error" icon="trash-a" disabled>删除</Button>
       </ButtonGroup>
@@ -144,6 +145,7 @@
   import DAGVisitor from '../utils/DAGVisitor'
   import Objects from '../utils/Objects'
   import DictApi from '../apis/DictApi'
+  import MsgBox from '../components/MsgBox'
 
   /**
    * ---Coding Naming Conventions---
@@ -217,7 +219,6 @@
       me: function () {
         return this.word.text
       },
-
       // --------- 6 RS0 ---------
       subsetRS0: function () {
         let self = this
@@ -297,13 +298,13 @@
           ? {src: w, dst: v, attr: attr}
           : {src: v, dst: w, attr: attr}
         event.target.value = null
-        DictApi.basicRelations.httpPost(rel, this.notifyOkAf(actionName), this.notifyFail(actionName))
+        DictApi.basicRelations.httpPost(rel)(this.notify(actionName))
       },
       /**
        * delete a basic relation
        */
       delBR (rel, attrName) {
-        DictApi.basicRelations.httpDelete(rel, this.notifyOkAf('移除' + attrName), this.notifyFail('移除' + attrName))
+        DictApi.basicRelations.httpDelete(rel)(this.notify('移除' + attrName))
       },
 
       addX1RtoLast (siblingES, event) {
@@ -311,19 +312,19 @@
         let v = event.target.value
         let w = this.word.text
         let rel = {src: w, attr: lastRel.attr, attrx: lastRel.attrx, pred: lastRel.pred, dst: v}
-        DictApi.x1Relations.httpPost(rel, this.notifyOkAf('添加属性'), this.notifyFail('添加属性'))
+        DictApi.x1Relations.httpPost(rel)(this.notify('添加属性'))
       },
 
       addX1R () {
         this.editor.x1RelToAdd.src = this.word.text
-        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd, this.notifyOkAf('添加属性'), this.notifyFail('添加属性'))
+        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd)(this.notify('添加属性'))
       },
       addX1R2 () {
         this.editor.x1RelToAdd2.dst = this.word.text
-        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd2, this.notifyOkAf('添加引用'), this.notifyFail('添加引用'))
+        DictApi.x1Relations.batchCreate(this.editor.x1RelToAdd2)(this.notify('添加引用'))
       },
       delX1R (rel) {
-        DictApi.x1Relations.httpDelete(rel, this.notifyOkAf('移除属性'), this.notifyFail('移除属性'))
+        DictApi.x1Relations.httpDelete(rel)(this.notify('移除属性'))
       },
       // delete X1R by example's (src,attr,attrx)
       delX1Rs (exampleRels) {
@@ -333,7 +334,7 @@
           this.$notify.error({title: '无法批量删除', message: '条件缺失:' + JSON.stringify(r1), duration: 0})
           return
         }
-        DictApi.x1Relations.httpDeleteSome(r1, this.notifyOkAf('移除属性'), this.notifyFail('移除属性'))
+        DictApi.x1Relations.httpDeleteSome(r1)(this.notify('移除属性'))
       },
 
       // ------------ misc ---------------
@@ -353,28 +354,22 @@
         if (!w) {
           return
         }
-        DictApi.words.httpGet(this.word, (d) => {
-          self.word = d
-          self.ui.loading = false
-        }, self.notifyFail('加载词汇'))
-      },
-
-      notifyOkAf (actionName) {
-        const self = this
-        return d => {
-          let msg = d.message ? d.message : (d.totalAffected ? d.totalAffected + '个条目已' + actionName : '')
-          self.$notify.success({title: actionName + '成功', message: msg})
-          self.loadItem()
-        }
-      },
-      notifyFail (actionName) {
-        const self = this
-        return d => {
-          let msg = d.message || ''
-          if (d.debugInfo) {
-            msg += d.debugInfo.message
+        DictApi.words.httpGet(this.word)(resp2 => {
+          if (!resp2.ok) {
+            MsgBox.open(self, '加载')
+            return
           }
-          self.$notify.error({title: actionName + '失败', message: msg, duration: 0})
+          self.$Message.success({content: '加载成功'})
+          self.word = resp2.data
+          self.ui.loading = false
+        })
+      },
+      // notify after action, reload if OK
+      notify (actionName) {
+        const self = this
+        return resp2 => {
+          MsgBox.open(self, actionName)(resp2)
+          if (resp2.ok) self.loadItem()
         }
       },
       rel2id: rel2id,

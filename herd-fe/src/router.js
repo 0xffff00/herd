@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 import iView from 'iview'
 import Hello from '@/views/Hello'
 import Album from '@/views/Album'
-import Album2 from '@/views/Album2'
 import RepoMan from '@/views/RepoMan'
 import WordMan from '@/views/WordMan'
 import WordEdit from '@/views/WordEdit'
@@ -17,11 +16,6 @@ const router = new VueRouter({
       path: '/hello',
       name: 'Hello',
       component: Hello
-    },
-    {
-      path: '/album2',
-      name: 'Album2',
-      component: Album2
     },
     {
       path: '/album',
