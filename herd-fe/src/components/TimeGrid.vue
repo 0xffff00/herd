@@ -13,7 +13,8 @@
         <td v-for="x1 in 7" :class="cssClassOfDateTd(x1-1,y1-1)" :style="cssStyleOfDateTd(x1-1,y1-1)">
           <a :style="cssOfDateBlock(x1 - 1, y1 - 1)"
              :title="getItem(x1 - 1, y1 - 1).date+'('+getItem(x1 - 1, y1 - 1).cnt+')'"
-             :href="hrefOfDate(x1 - 1, y1 - 1)">
+             :href="hrefOfDate(x1 - 1, y1 - 1)"
+             @click="clickDateBlock(x1 - 1, y1 - 1)">
           </a>
         </td>
       </tr>
@@ -194,6 +195,10 @@
         let v = this.getItem(x, y)
         if (v && v.cnt) return `#img-${v.date}`
         return `#img-${v.date && v.date.slice(0, 4)}`
+      },
+      clickDateBlock (x, y) {
+        let v = this.getItem(x, y)
+        this.$emit('clickDate', v)
       }
     }
   }

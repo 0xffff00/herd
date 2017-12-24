@@ -9,12 +9,6 @@
             首页
           </MenuItem>
         </router-link>
-        <router-link to="/album2">
-          <MenuItem name="/album2">
-            <Icon type="images"></Icon>
-            相册x
-          </MenuItem>
-        </router-link>
         <router-link to="/album">
           <MenuItem name="/album">
             <Icon type="images"></Icon>
@@ -57,7 +51,7 @@
       </div>
     </Menu>
 
-    <div>
+    <div style="margin-top: 60px;">
 
     </div>
     <div class="layout-breadcrumb" style="display: none;">
@@ -105,10 +99,13 @@
 </script>
 
 <style scoped>
-  .layout {
-    font-family: 'Roboto', 'RobotoDraft', 'Avenir', Helvetica, Arial, sans-serif;
-    border: 1px solid #d7dde4;
+  #layout {
+    /*font-family: 'Roboto', 'RobotoDraft', 'Avenir', Helvetica, Arial, sans-serif;*/
+    /*border: 1px solid #d7dde4;*/
+    /*background: #f5f7f9;*/
     background: #f5f7f9;
+    position: relative;
+    overflow: hidden;
   }
 
   .layout-logo {
@@ -142,7 +139,7 @@
 
   .layout-content {
     min-height: 200px;
-    margin: 15px;
+    margin: 5px;
     overflow: hidden;
     background: #fff;
     border-radius: 4px;
@@ -156,5 +153,10 @@
     text-align: center;
     padding: 10px 0 20px;
     color: #9ea7b4;
+  }
+
+  .ivu-menu{
+    position: fixed;
+    width: 100%;
   }
 </style>

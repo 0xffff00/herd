@@ -23,10 +23,10 @@ const open = (vue, actionName = null) => (resp2) => {
     if (resp2.totalAffected) {
       body = resp2.totalAffected + '个条目' + (actionName ? '已' + actionName : '受影响')
     }
-    this.vue.$Notice.success({title: title, desc: body})
+    vue.$Notice.success({title: title, desc: body})
   } else {
     let errInfo = toErrInfo(resp2, actionName)
-    this.vue.$Notice.error({title: errInfo.title, desc: errInfo.body, duration: 0})
+    vue.$Notice.error({title: errInfo.title, desc: errInfo.body, duration: 0})
   }
 }
 
