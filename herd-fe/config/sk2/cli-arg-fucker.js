@@ -1,7 +1,16 @@
-// webpack.DefinePlugin屏蔽自定义命令行参数的坑：
-// 想要拿到npm run --arg1=xxx的命令行参数arg1,
-// 在src的js调用无论是require('../../config')还是process.env.npm_config_*都是没有用的
-// 在webpack.*.conf.js里调用，src中process.env才有值，因为process.env被webpack.DefinePlugin重载了。
+/**
+ * webpack.DefinePlugin屏蔽自定义命令行参数的坑：
+ * 想要拿到npm run --arg1=xxx的命令行参数arg1,
+ * 在src的js调用无论是require('../../config')还是process.env.npm_config_*都是没有用的
+ * 在webpack.*.conf.js里调用，src中process.env才有值，因为process.env被webpack.DefinePlugin重载了。
+ *
+ * 如何使用：
+ * 复制这3个js到confg/sk2下
+ * 在 webpack.dev.conf.js的exports语句添加：
+ * require('../config/sk2/cli-arg-fucker').addCustomCliArgsToEnv(config.dev.env)
+ * 然后在自己的代码中import '/config/sk2/app-conf'即可
+ *
+ */
 
 const wrapArg = function (x) {
   if (x === null || x === undefined) {
