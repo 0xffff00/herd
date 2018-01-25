@@ -1,5 +1,6 @@
 package party.threebody.herd.util;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import party.threebody.herd.domain.ImageInfo;
 
@@ -7,6 +8,7 @@ import java.nio.file.Paths;
 
 public class ImageMetaUtilsTest {
 
+    @Ignore
     @Test
     public void parseExifInfo() throws Exception{
         ImageInfo imageInfo = ImageMetaUtils.parseExifInfo(

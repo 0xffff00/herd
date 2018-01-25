@@ -12,7 +12,7 @@ spring:
     serialization.write_dates_as_timestamps: false
 
 server:
-  port: 8980
+  port: 8930
 
 logging:
   level:
