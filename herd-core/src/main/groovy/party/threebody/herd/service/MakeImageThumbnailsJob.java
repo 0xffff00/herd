@@ -22,12 +22,6 @@ import static party.threebody.herd.job.JobResult.SKIPPED;
 @Component
 public class MakeImageThumbnailsJob extends BasicLinarJob<Path> {
 
-    static final ImageConverter JPGC_1Kq5 = ImageConverter.toJPG().name("1Kq5")
-            .edgeNoLessThan(720).edgeNoMoreThan(720 * 4)
-            .compressQuality(0.5).noCompressIfBppBelow(0.12);
-    static final ImageConverter JPGC_2Kq7 = ImageConverter.toJPG().name("2Kq7")
-            .edgeNoLessThan(1440).edgeNoMoreThan(1440 * 4)
-            .compressQuality(0.7).noCompressIfBppBelow(0.12);
 
     @Autowired BatchSyncService batchSyncService;
     @Autowired private MediaFileDao mediaFileDao;
@@ -40,7 +34,7 @@ public class MakeImageThumbnailsJob extends BasicLinarJob<Path> {
     }
 
     public void prepare(Path srcDirPath) {
-        prepare(srcDirPath, JPGC_1Kq5);
+        prepare(srcDirPath, ImageConverter.h200q5);
     }
 
     public void prepare(Path srcDirPath, ImageConverter converter) {

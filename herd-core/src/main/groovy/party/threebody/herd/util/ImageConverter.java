@@ -18,6 +18,17 @@ import java.time.LocalDateTime;
  *
  */
 public class ImageConverter {
+
+    public static final ImageConverter h200q5 = ImageConverter.toJPG().name("h2q5")
+            .heightNoMoreThan(200).heightNoLessThan(200)
+            .compressQuality(0.5).noCompressIfBppBelow(0.12);
+    public static final ImageConverter e1024q5 = ImageConverter.toJPG().name("1Kq5")
+            .edgeNoLessThan(720).edgeNoMoreThan(720 * 4)
+            .compressQuality(0.5).noCompressIfBppBelow(0.12);
+    public static final ImageConverter e2048q7 = ImageConverter.toJPG().name("2Kq7")
+            .edgeNoLessThan(1440).edgeNoMoreThan(1440 * 4)
+            .compressQuality(0.7).noCompressIfBppBelow(0.12);
+
     static final Logger logger = LoggerFactory.getLogger(ImageConverter.class);
 
     private String name;
@@ -52,6 +63,17 @@ public class ImageConverter {
 
     public ImageConverter name(String name) {
         this.name = name;
+        return this;
+    }
+    public ImageConverter heightNoMoreThan(int maxPx) {
+        maxHeight = maxPx;
+        priorToMin = false;
+        return this;
+    }
+
+    public ImageConverter heightNoLessThan(int minPx) {
+        minHeight = minPx;
+        priorToMin = true;
         return this;
     }
 
