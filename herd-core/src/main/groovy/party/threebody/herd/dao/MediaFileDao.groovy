@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import party.threebody.herd.domain.MediaFile
 import party.threebody.skean.jdbc.ChainedJdbcTemplate
-import party.threebody.skean.web.mvc.dao.legacy.LegacySinglePKJpaCrudDAO
+import party.threebody.skean.web.mvc.dao.legacy.LegacyDualPKsJpaCrudDAO
 
 @Repository
-class MediaFileDao extends LegacySinglePKJpaCrudDAO<MediaFile, String> {
+class MediaFileDao extends LegacyDualPKsJpaCrudDAO<MediaFile, String, String> {
 
     @Autowired
     ChainedJdbcTemplate cjt
@@ -27,7 +27,7 @@ class MediaFileDao extends LegacySinglePKJpaCrudDAO<MediaFile, String> {
 
 
     List<MediaFile> listByPathPrefix(String pathPrefix) {
-        def sql = "SELECT * FROM $table WHERE path LIKE ?"
+        def sql = "SELECT * FROM $table WHERE dir_path LIKE ?"
         cjt.sql(sql).arg(pathPrefix + '%').list(MediaFile.class)
     }
 
@@ -36,7 +36,7 @@ class MediaFileDao extends LegacySinglePKJpaCrudDAO<MediaFile, String> {
 //    }
 
     int deleteSomeByPathPrefix(String pathPrefix) {
-        def sql = "DELETE FROM $table WHERE path LIKE ?"
+        def sql = "DELETE FROM $table WHERE dir_path LIKE ?"
         cjt.sql(sql).arg(pathPrefix + '%').execute()
     }
 

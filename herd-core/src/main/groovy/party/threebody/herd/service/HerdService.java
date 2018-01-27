@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import party.threebody.herd.dao.ImageInfoDao;
 import party.threebody.herd.dao.MediaFileDao;
 import party.threebody.herd.domain.MediaFile;
+import party.threebody.herd.util.HerdFiles;
 import party.threebody.herd.util.MediaType;
 import party.threebody.skean.data.query.BasicCriterion;
 import party.threebody.skean.data.query.Criteria;
@@ -55,6 +56,10 @@ public class HerdService {
     }
 
 
+    public MediaFile getMediaFileByFullPath(Path fullPath){
+        return mediaFileDao
+                .readOne(HerdFiles.toString(fullPath.getParent()),HerdFiles.toString(fullPath.getFileName()));
+    }
     public byte[] getMediaFileContent(String hash, String cacheCategory) throws IOException {
         if (cacheCategory != null) {
             Path p = Paths.get(localThumbnailRepoPath,
@@ -65,7 +70,7 @@ public class HerdService {
             }
         }
         MediaFile mediaFile = mediaFileDao.getByHash(hash);
-        Path path = Paths.get(mediaFile.getPath());
+        Path path = Paths.get(mediaFile.getFullPath());
         if (Files.exists(path)) {
             logger.debug("read file from ORIGIN: {}", path.toString());
             return Files.readAllBytes(path);

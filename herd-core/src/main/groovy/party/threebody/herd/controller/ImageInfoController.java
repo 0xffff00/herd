@@ -13,7 +13,7 @@ import party.threebody.skean.web.mvc.controller.SinglePKUriVarCrudRestController
 
 @RestController
 @RequestMapping("image-infos")
-public class ImageInfoRestController extends SinglePKUriVarCrudRestController<ImageInfo, String> {
+public class ImageInfoController extends SinglePKUriVarCrudRestController<ImageInfo, String> {
     @Autowired
     HerdService herdService;
 

@@ -2,11 +2,13 @@ package party.threebody.herd.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import party.threebody.herd.domain.MediaFile;
 import party.threebody.skean.misc.SkeanException;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +44,16 @@ public class HerdFiles {
 
     public static String toString(Path path) {
         return path.toString().replaceAll("\\\\", "/");
+    }
+
+    /**
+     * judge mediaFile's file path is expected
+     * @param mediaFile
+     * @param expectedPath
+     * @return
+     */
+    public static boolean pathEquals(MediaFile mediaFile,Path expectedPath){
+        return Paths.get(mediaFile.getDirPath(),mediaFile.getFileName()).equals(expectedPath);
     }
 
 

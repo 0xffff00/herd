@@ -20,9 +20,8 @@ import static party.threebody.herd.job.JobResult.*;
 
 @Component
 public class ParseMediaFilesJob extends BasicLinarJob<Path> {
-    @Autowired MediaFileDao mediaFileDao;
     @Autowired ImageInfoDao imageInfoDao;
-
+    @Autowired HerdService herdService;
     Path rootDirPath;
 
     public ParseMediaFilesJob() {
@@ -39,7 +38,7 @@ public class ParseMediaFilesJob extends BasicLinarJob<Path> {
 
     @Override
     protected String takeStep(Path path) throws Exception {
-        MediaFile mf = mediaFileDao.readOne(HerdFiles.toString(path));
+        MediaFile mf = herdService.getMediaFileByFullPath(path);
         if (mf == null) {
             return FAILED;
         }
@@ -50,7 +49,7 @@ public class ParseMediaFilesJob extends BasicLinarJob<Path> {
         }
 
         if (mf.getMimeType()!=null && mf.getMimeType().startsWith("image")) {
-            InputStream inputStream = Files.newInputStream(Paths.get(mf.getPath()));
+            InputStream inputStream = Files.newInputStream(Paths.get(mf.getFullPath()));
             imageInfo = ImageMetaUtils.parseExifInfo(inputStream);
             imageInfo.setHash(hash);
             imageInfoDao.create(imageInfo);

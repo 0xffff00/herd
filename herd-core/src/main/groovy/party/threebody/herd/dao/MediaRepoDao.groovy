@@ -27,12 +27,12 @@ class MediaRepoDao extends SinglePKJpaCrudDAO<MediaRepo, String> {
     List<MediaRepo> readList(CriteriaAndSortingAndPaging csp) {
         def sql="""
 SELECT r.*, 
-(SELECT COUNT(*) FROM hd_me_file f WHERE f.path LIKE CONCAT(r.path,'%')) file_cnt,
-(SELECT COUNT(*) FROM hd_me_file f JOIN hd_me_file_image fi ON f.hash=fi.hash WHERE f.path LIKE CONCAT(r.path,'%')) img_cnt
+(SELECT COUNT(*) FROM hd_me_file f WHERE f.dir_path LIKE CONCAT(r.path,'%')) file_cnt,
+(SELECT COUNT(*) FROM hd_me_file f JOIN hd_me_file_image fi ON f.hash=fi.hash WHERE f.dir_path LIKE CONCAT(r.path,'%')) img_cnt
 FROM hd_me_repo r
 """
         ensureCriteriaLegal(csp)
         //TODO https://github.com/0xffff00/skean/issues/10
-        cjt.fromSql(sql).criteria(csp.criteria).list(getEntityClass())
+        cjt.fromSql(sql).suite(csp).list(getEntityClass())
     }
 }

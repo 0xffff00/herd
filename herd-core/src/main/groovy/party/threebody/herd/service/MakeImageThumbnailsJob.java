@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Collections;
 
 import static party.threebody.herd.job.JobResult.OK;
 import static party.threebody.herd.job.JobResult.SKIPPED;
@@ -25,8 +24,7 @@ public class MakeImageThumbnailsJob extends BasicLinarJob<Path> {
 
 
     @Autowired BatchSyncService batchSyncService;
-    @Autowired private MediaFileDao mediaFileDao;
-
+    @Autowired HerdService herdService;
     private Path destDirPath;
     private Path srcDirPath;
     private ImageConverter converter;
@@ -49,13 +47,13 @@ public class MakeImageThumbnailsJob extends BasicLinarJob<Path> {
 
     @Override
     public Collection<Path> getStepConsumers() {
-            return HerdFiles.listAllFilesDeeply(srcDirPath);
+        return HerdFiles.listAllFilesDeeply(srcDirPath);
 
     }
 
     @Override
     protected String takeStep(Path path) throws Exception {
-        MediaFile mf = mediaFileDao.readOne(HerdFiles.toString(path));
+        MediaFile mf = herdService.getMediaFileByFullPath(path);
         if (!MediaTypeUtils.isImageFileByPath(path.toString())) {
             return SKIPPED;
         }

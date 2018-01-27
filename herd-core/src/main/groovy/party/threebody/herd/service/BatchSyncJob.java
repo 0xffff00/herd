@@ -61,7 +61,7 @@ public class BatchSyncJob extends MonoBatchSyncJob {
                         oldMediaFiles = mediaFileDao.listByPathPrefix(HerdFiles.toString(rootDirPath));
                         newPaths = HerdFiles.listAllFilesDeeply(rootDirPath);
                         deadMediaFiles = oldMediaFiles.stream()
-                                .filter(mp -> !Files.exists(Paths.get(mp.getPath())))
+                                .filter(mp -> !Files.exists(Paths.get(mp.getDirPath(),mp.getFileName())))
                                 .collect(Collectors.toList());
                         parseMediaFilesJob.prepare(rootDirPath);
                         makeImageThumbnailsJob.prepare(rootDirPath, imageConverterName);
@@ -95,8 +95,9 @@ public class BatchSyncJob extends MonoBatchSyncJob {
         @Override
         protected String takeStep(Path path) throws Exception {
             Thread.sleep(10);
+            String fullPathStr=HerdFiles.toString(path);
             Optional<MediaFile> opmf = oldMediaFiles.stream()
-                    .filter(mp -> mp.getPath().equals(HerdFiles.toString(path)))
+                    .filter(mp -> fullPathStr.equals(mp.getFullPath()))
                     .findFirst();
             int fileSize = (int) Files.size(path);
             if (opmf.isPresent()) {
@@ -116,14 +117,15 @@ public class BatchSyncJob extends MonoBatchSyncJob {
                 return FAILED;
             }
             if (opmf.isPresent()) {  // update after re-hash
-                mediaFileDao.partialUpdate(Maps.of("hash", hash), opmf.get().getPath());
+                mediaFileDao.partialUpdate(Maps.of("hash", hash), opmf.get().getDirPath(),opmf.get().getFileName());
             } else {  // create after hash
                 MediaFile mf = new MediaFile();
                 mf.setHash(hash);
-                mf.setPath(HerdFiles.toString(path));
+                mf.setDirPath(HerdFiles.toString(path.getParent()));
+                mf.setFileName(HerdFiles.toString(path.getFileName()));
                 mf.setSize(fileSize);
                 mf.setSyncTime(LocalDateTime.now());
-                mf.setMimeType(MediaTypeUtils.guessMimeTypeByPath(mf.getPath()));
+                mf.setMimeType(MediaTypeUtils.guessMimeTypeByPath(mf.getFullPath()));
                 mediaFileDao.create(mf);
             }
             return OK;
@@ -151,7 +153,7 @@ public class BatchSyncJob extends MonoBatchSyncJob {
 
         @Override
         protected String getStepText(MediaFile mediaPath) {
-            return "移除已失效的文件记录：" + mediaPath.getPath();
+            return "移除已失效的文件记录：" + mediaPath.getFullPath();
         }
     }
 
