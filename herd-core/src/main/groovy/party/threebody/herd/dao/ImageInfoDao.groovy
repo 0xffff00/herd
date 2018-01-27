@@ -30,7 +30,7 @@ SELECT (SELECT size FROM hd_me_file  WHERE fi.hash=HASH LIMIT 1) file_size,
 fi.*
 FROM hd_me_file_image fi
 """
-        cjt.fromSql(sql).suite(csp).list(ImageInfo.class)
+        cjt.fromSql(sql).criteriaAndSortAndPage(csp).list(ImageInfo.class)
     }
 
     List<ImageInfo> listByHashs(Collection<String> hashs) {

@@ -33,6 +33,6 @@ FROM hd_me_repo r
 """
         ensureCriteriaLegal(csp)
         //TODO https://github.com/0xffff00/skean/issues/10
-        cjt.fromSql(sql).suite(csp).list(getEntityClass())
+        cjt.fromSql(sql).criteriaAndSortAndPage(csp).list(getEntityClass())
     }
 }

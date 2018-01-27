@@ -16,8 +16,8 @@ server:
 
 logging:
   level:
-    #party.threebody.skean.jdbc: DEBUG
-    party.threebody.skean.jdbc.SqlPrinter: WARN
+    party.threebody.skean.jdbc: DEBUG
+    #party.threebody.skean.jdbc.SqlPrinter: WARN
     party.threebody.herd: DEBUG
 
 skean:
