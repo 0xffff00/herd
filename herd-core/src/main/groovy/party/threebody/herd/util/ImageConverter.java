@@ -60,7 +60,7 @@ public class ImageConverter {
             case "h500q5":
                 return h500q5;
             case "e1024q5":
-                return h500q5;
+                return e1024q5;
             case "e2048q7":
                 return e2048q7;
             default:

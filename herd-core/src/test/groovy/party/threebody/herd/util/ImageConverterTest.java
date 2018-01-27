@@ -33,7 +33,7 @@ public class ImageConverterTest {
 
     void testCalcS(int w, int h, int min, int max) {
         //double r = ImageConverter.toJPG().edgeNoLessThan(min).edgeNoMoreThan(max).calculateScaling(w, h);
-        double r = ImageConverter.toJPG().heightNoMoreThan(200).heightNoLessThan(200).calculateScaling(w, h);
+        double r = ImageConverter.toJPG().heightNoMoreThan(500).heightNoLessThan(500).calculateScaling(w, h);
         System.out.printf("(%d,%d),e in[%d,%d]-> (%.1f,%.1f)=%fMP, s=%f\n",
                 w, h, min, max, w * r, h * r, r * r * w / 1000 * h / 1000, r);
     }

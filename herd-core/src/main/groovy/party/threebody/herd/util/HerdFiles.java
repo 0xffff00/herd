@@ -1,14 +1,21 @@
 package party.threebody.herd.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import party.threebody.skean.misc.SkeanException;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class HerdFiles {
+
+    static Logger logger = LoggerFactory.getLogger(HerdFiles.class);
+
     private HerdFiles() {
     }
 
@@ -27,13 +34,14 @@ public class HerdFiles {
             return Files.walk(rootDirPath)
                     .filter(Files::isRegularFile)
                     .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new SkeanException("fail to visit: " + rootDirPath, e);
+        } catch (Exception e) {
+            throw new SkeanException("fail to visit: " + rootDirPath,e);
         }
     }
 
-    public static String toString(Path path){
-        return path.toString().replaceAll("\\\\","/");
+
+    public static String toString(Path path) {
+        return path.toString().replaceAll("\\\\", "/");
     }
 
 

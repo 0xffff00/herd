@@ -57,6 +57,7 @@ public class ComposedLinarJob implements LinarJob {
     public void start() {
         if (rootStatus != null && rootStatus.getCategory().equals(JobStatus.Category.RUNNING)) {
             halt("fail to start an already running job.");
+            return;
         }
         rootStatus = new BasicJobStatus(getChildren().size());
         flattenStatus = null;
@@ -69,6 +70,7 @@ public class ComposedLinarJob implements LinarJob {
             child.start();
             if (child.getStatus().getCategory().equals(JobStatus.Category.HALTED)) {
                 halt(child.getStatus().getCurrentMessage());
+                return;
             }
             rootStatus.asDone();
         }
@@ -82,15 +84,16 @@ public class ComposedLinarJob implements LinarJob {
 
     @Override
     public void halt(String message) {
-        if (rootStatus == null) {
-            rootStatus = new BasicJobStatus(0);
-        }
+        rootStatus = new BasicJobStatus(0);
         logger.error("Job[{}] HALTED: ", getName(), message);
         rootStatus.asHalted(message);
     }
 
     @Override
     public JobStatus getStatus() {
+        if (rootStatus != null && rootStatus.getTotalSteps() == 0) {
+            return rootStatus;
+        }
         return getFlattenStatus();
     }
 
@@ -207,6 +210,7 @@ public class ComposedLinarJob implements LinarJob {
         @Override
         public int getTotalSteps() {
             return jobs.stream()
+                    .filter(Objects::nonNull)
                     .map(LinarJob::getStatus)
                     .filter(Objects::nonNull)
                     .mapToInt(JobStatus::getTotalSteps)

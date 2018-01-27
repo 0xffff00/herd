@@ -60,12 +60,16 @@ public abstract class BasicLinarJob<C> implements LinarJob {
     public void start() {
         if (status != null && status.getCategory().equals(JobStatus.Category.RUNNING)) {
             halt("fail to start an already running job.");
+            return;
         }
-        Collection<C> consumers = getStepConsumers();
-        if (consumers == null) {
-            halt("stepConsumers not initialized.");
+        Collection<C> consumers;
+        try {
+            consumers = getStepConsumers();
+            status = new BasicJobStatus(consumers.size());
+        } catch (Exception e) {
+            halt("fail to get steps. stepConsumers not initialized.");
+            return;
         }
-        status = new BasicJobStatus(consumers.size());
         status.setStartTime(LocalDateTime.now());
         logger.info("Job[{}] Started. {} steps included.", getName(), consumers.size());
         for (C item : consumers) {
@@ -110,21 +114,19 @@ public abstract class BasicLinarJob<C> implements LinarJob {
 
     @Override
     public void halt(String message) {
-        if (status == null) {
-            status = new BasicJobStatus(0);
-        }
+        status = new BasicJobStatus(0);
         logger.error("Job[{}] HALTED: ", getName(), message);
         status.asHalted(message);
     }
 
     @Override
     public BasicJobStatus getStatus() {
-        if (status == null) {
-            Collection<C> consumers = getStepConsumers();
-            if (consumers != null) {
-                status = new BasicJobStatus(consumers.size());
-            }
-        }
+//        if (status == null) {
+//            Collection<C> consumers = getStepConsumers();
+//            if (consumers != null) {
+//                status = new BasicJobStatus(consumers.size());
+//            }
+//        }
         return status;
     }
 

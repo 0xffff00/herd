@@ -12,7 +12,7 @@ class MetaDao {
     @Autowired
     ChainedJdbcTemplate cjt
 
-    void releaseMediaSyncLock() {
+    int releaseMediaSyncLock() {
         cjt.sql("update $table set val='INACTIVE' where name='$mediaSyncStatus'").execute()
     }
 

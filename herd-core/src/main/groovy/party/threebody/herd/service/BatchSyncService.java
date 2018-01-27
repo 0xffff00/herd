@@ -33,8 +33,8 @@ public class BatchSyncService {
     }
 
     @Transactional
-    public void releaseRepoSyncLock() {
-        metaDao.releaseMediaSyncLock();
+    public int releaseRepoSyncLock() {
+        return metaDao.releaseMediaSyncLock();
     }
 
 

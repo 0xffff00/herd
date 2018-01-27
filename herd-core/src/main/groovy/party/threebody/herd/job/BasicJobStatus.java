@@ -85,7 +85,7 @@ public class BasicJobStatus implements JobStatus {
 
     public void asHalted(String fatalMessage) {
         as(JobResult.HALTED);
-        currentMessage=fatalMessage;
+        currentMessage = fatalMessage;
         broken = true;
     }
 
@@ -129,13 +129,13 @@ public class BasicJobStatus implements JobStatus {
         if (broken) {
             return Category.HALTED;
         }
-        if (getCurrent() ==0){
+        if (getCurrent() == 0) {
             return Category.INITIAL;
         }
-        if (getCurrent() > getTotalSteps()){
+        if (getCurrent() > getTotalSteps()) {
             return Category.COMPLETED;
         }
-       return Category.RUNNING;
+        return Category.RUNNING;
     }
 
 }
