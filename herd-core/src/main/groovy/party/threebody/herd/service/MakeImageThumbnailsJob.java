@@ -33,12 +33,8 @@ public class MakeImageThumbnailsJob extends BasicLinarJob<Path> {
     public MakeImageThumbnailsJob() {
     }
 
-    public void prepare(Path srcDirPath) {
-        prepare(srcDirPath, ImageConverter.h200q5);
-    }
-
-    public void prepare(Path srcDirPath, ImageConverter converter) {
-        this.converter = converter;
+    public void prepare(Path srcDirPath, String imageConverterName) {
+        this.converter = ImageConverter.getInstance(imageConverterName);
         this.srcDirPath = srcDirPath;
         String localThumbnailRepoPath = batchSyncService.getLocalThumbnailRepoPath();
         destDirPath = Paths.get(localThumbnailRepoPath, converter.getName());
@@ -58,13 +54,13 @@ public class MakeImageThumbnailsJob extends BasicLinarJob<Path> {
     @Override
     protected String takeStep(Path path) throws Exception {
         MediaFile mf = mediaFileDao.readOne(HerdFiles.toString(path));
-        if (!MediaTypeUtils.isImageFileByPath(path.toString())){
+        if (!MediaTypeUtils.isImageFileByPath(path.toString())) {
             return SKIPPED;
         }
         File srcFile = path.toFile();
         String fileName = mf.getHash() + "." + MediaType.JPEG.getSuffix();
         Path destPath = destDirPath.resolve(fileName);
-        if (Files.exists(destPath)){
+        if (Files.exists(destPath)) {
             return SKIPPED;
         }
         converter.convertToJPG(srcFile, destPath.toFile());

@@ -50,7 +50,7 @@ public class BatchSyncJob extends MonoBatchSyncJob {
         super(batchSyncService);
     }
 
-    public void prepare(Path rootDirPath) {
+    public void prepare(Path rootDirPath, String imageConverterName) {
         if (rootDirPath == null) {
             throw new SkeanNotFoundException("rootDirPath missing");
         }
@@ -64,7 +64,7 @@ public class BatchSyncJob extends MonoBatchSyncJob {
                                 .filter(mp -> !Files.exists(Paths.get(mp.getPath())))
                                 .collect(Collectors.toList());
                         parseMediaFilesJob.prepare(rootDirPath);
-                        makeImageThumbnailsJob.prepare(rootDirPath);
+                        makeImageThumbnailsJob.prepare(rootDirPath, imageConverterName);
                         return null;
                     }
 
@@ -76,7 +76,7 @@ public class BatchSyncJob extends MonoBatchSyncJob {
                 new PutNewMediaFilesJob(),
                 new DeleteDeadMediaFilesJob(),
                 parseMediaFilesJob
-                ,makeImageThumbnailsJob
+                , makeImageThumbnailsJob
         );
     }
 

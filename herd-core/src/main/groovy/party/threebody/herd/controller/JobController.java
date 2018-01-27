@@ -1,6 +1,7 @@
 package party.threebody.herd.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +33,10 @@ public class JobController {
     @Async
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PutMapping("batch-sync")
-    public void startBatchSyncJob(@RequestParam String repoName) {
+    public void startBatchSyncJob(@RequestParam String repoName,
+                                  @RequestParam(required = false) String imageConverterName) {
         Path rootDirPath = getRepoRootDirPath(repoName);
-        batchSyncJob.prepare(rootDirPath);
+        batchSyncJob.prepare(rootDirPath, imageConverterName);
         batchSyncJob.start();
     }
 

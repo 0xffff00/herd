@@ -19,15 +19,19 @@ import java.time.LocalDateTime;
  */
 public class ImageConverter {
 
-    public static final ImageConverter h200q5 = ImageConverter.toJPG().name("h2q5")
+    public static final ImageConverter h200q5 = ImageConverter.toJPG().name("h200q5")
             .heightNoMoreThan(200).heightNoLessThan(200)
             .compressQuality(0.5).noCompressIfBppBelow(0.12);
-    public static final ImageConverter e1024q5 = ImageConverter.toJPG().name("1Kq5")
+    public static final ImageConverter h500q5 = ImageConverter.toJPG().name("h500q5")
+            .heightNoMoreThan(500).heightNoLessThan(500)
+            .compressQuality(0.5).noCompressIfBppBelow(0.12);
+    public static final ImageConverter e1024q5 = ImageConverter.toJPG().name("e1024q5")
             .edgeNoLessThan(720).edgeNoMoreThan(720 * 4)
             .compressQuality(0.5).noCompressIfBppBelow(0.12);
-    public static final ImageConverter e2048q7 = ImageConverter.toJPG().name("2Kq7")
+    public static final ImageConverter e2048q7 = ImageConverter.toJPG().name("e2048q7")
             .edgeNoLessThan(1440).edgeNoMoreThan(1440 * 4)
             .compressQuality(0.7).noCompressIfBppBelow(0.12);
+    public static final ImageConverter DEFAULT = h500q5;
 
     static final Logger logger = LoggerFactory.getLogger(ImageConverter.class);
 
@@ -45,6 +49,24 @@ public class ImageConverter {
     private boolean scalingPreferSimpleFraction;
 
     private MediaType targetType;
+
+    public static ImageConverter getInstance(String name) {
+        if (name == null) {
+            return DEFAULT;
+        }
+        switch (name) {
+            case "h200q5":
+                return h200q5;
+            case "h500q5":
+                return h500q5;
+            case "e1024q5":
+                return h500q5;
+            case "e2048q7":
+                return e2048q7;
+            default:
+                return DEFAULT;
+        }
+    }
 
     private ImageConverter() {
         this.compressQuality = 0.6;
@@ -65,6 +87,7 @@ public class ImageConverter {
         this.name = name;
         return this;
     }
+
     public ImageConverter heightNoMoreThan(int maxPx) {
         maxHeight = maxPx;
         priorToMin = false;
